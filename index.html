@@ -3,338 +3,306 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Trade With Daksh — Paper Motion Film</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TOPG VIP Levels — Free Access</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=IBM+Plex+Mono:wght@400;600&display=swap');
 
-:root {
-  --paper:#e9dfc9;
-  --ink:#25231f;
-  --orange:#c94d32;
-  --shadow:#8b795c;
+:root{
+  --paper:#f0e8d8;
+  --ink:#171713;
+  --orange:#cc6548;
+  --muted:#9f927b;
+  --green:#52745a;
 }
 *{box-sizing:border-box}
 body{
-  margin:0;background:#151515;color:var(--ink);
-  display:grid;place-items:center;min-height:100vh;
+  margin:0;background:#171713;display:grid;
+  place-items:center;min-height:100vh;
   font-family:'IBM Plex Mono',monospace;
 }
-#film{
+#video{
   width:min(100vw,56.25vh);
   height:min(177.78vw,100vh);
-  aspect-ratio:9/16;
   position:relative;overflow:hidden;
-  background:var(--paper);
-  box-shadow:0 0 60px #0009;
+  background:var(--paper);color:var(--ink);
   isolation:isolate;
 }
-.paper{
-  position:absolute;inset:0;z-index:8;pointer-events:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.23'/%3E%3C/svg%3E");
-  opacity:.27;mix-blend-mode:multiply;
+.grid{
+  position:absolute;inset:0;z-index:0;
+  background-image:
+    linear-gradient(#8d80621b 1px,transparent 1px),
+    linear-gradient(90deg,#8d80621b 1px,transparent 1px);
+  background-size:34px 34px;
 }
-.fold{
-  position:absolute;top:0;bottom:0;left:50%;
-  width:2px;background:#a18f6e22;
-  box-shadow:3px 0 7px #6f60401a;z-index:1;
+.grain{
+  position:absolute;inset:-40%;z-index:8;
+  pointer-events:none;opacity:.15;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
 }
-.topline{
-  position:absolute;left:8%;right:8%;top:5%;
+.header,.footer{
+  position:absolute;z-index:9;left:7%;right:7%;
   display:flex;justify-content:space-between;
-  font-size:clamp(7px,2vw,10px);letter-spacing:1.4px;
-  z-index:6;color:#655a48;
+  align-items:center;font-size:8px;letter-spacing:1px;
 }
-.topline b{color:var(--orange)}
+.header{top:4%}
+.footer{bottom:3%;color:#70634e}
+.line{height:4px;width:30px;background:var(--orange);margin-bottom:8px}
+.brand{font-weight:600}
+.page{color:var(--orange)}
 .scene{
-  position:absolute;inset:0;opacity:0;
-  pointer-events:none;
+  position:absolute;inset:0;z-index:2;
+  opacity:0;visibility:hidden;
+  transition:opacity .35s ease;
 }
-.scene.active{opacity:1}
+.scene.active{opacity:1;visibility:visible}
 .kicker{
-  position:absolute;top:13%;left:8%;right:8%;
-  font-size:clamp(8px,2.2vw,11px);
-  letter-spacing:1.8px;font-weight:600;
+  position:absolute;left:8%;right:8%;top:12%;
+  font-size:9px;letter-spacing:1.4px;color:#74654e;
 }
 h1{
-  position:absolute;top:16%;left:7%;right:5%;
-  margin:0;font-family:'Barlow Condensed',Impact,sans-serif;
-  font-size:clamp(55px,16vw,100px);
-  line-height:.78;letter-spacing:-1.8px;
-  font-weight:900;text-transform:uppercase;
+  position:absolute;left:7%;right:5%;top:17%;
+  margin:0;font:900 clamp(48px,14vw,86px)/.84
+  'Barlow Condensed',Impact,sans-serif;
+  letter-spacing:-1px;text-transform:uppercase;
 }
-h1 .red{color:var(--orange)}
-.caption{
-  position:absolute;top:37%;left:8%;right:8%;
-  font-size:clamp(9px,2.5vw,13px);line-height:1.7;
-  color:#5d5344;
+.orange{color:var(--orange)}
+.copy{
+  position:absolute;left:8%;right:8%;top:37%;
+  font-size:clamp(11px,3.1vw,15px);
+  line-height:1.7;color:#514938;
 }
-.bottomline{
-  position:absolute;bottom:4%;left:8%;right:8%;
-  display:flex;justify-content:space-between;
-  font-size:7px;letter-spacing:1px;color:#655a48;
-  z-index:6;
+.copy strong{color:var(--ink)}
+.visual{
+  position:absolute;left:8%;right:8%;top:53%;
+  height:27%;display:flex;align-items:center;
+  justify-content:center;
 }
-.bottomline b{color:var(--orange)}
-.scene-no{
-  position:absolute;right:8%;top:9%;
-  font:700 12px 'IBM Plex Mono',monospace;color:#88775e;
+.card{
+  width:100%;height:100%;position:relative;
+  background:#e4d8c2;border:2px solid #b4a183;
+  box-shadow:5px 7px 0 #7c6b4b35;
+  display:flex;align-items:center;justify-content:center;
 }
-
-/* Paper objects */
-.object{
-  position:absolute;filter:drop-shadow(3px 7px 2px #59493235);
+.badge-vip{
+  width:130px;max-width:65%;aspect-ratio:1;
+  background:var(--orange);color:#fff1db;
+  border:5px double #f0dfbd;
+  border-radius:50%;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  box-shadow:5px 8px 0 #80634455;
+  transform:rotate(-8deg);
 }
-.thermo{
-  width:13%;height:35%;left:44%;top:43%;
-  border:2px solid #c8b99a;border-radius:30px;
-  background:#e4d8bf;transform:rotate(3deg);
+.badge-vip b{
+  font:900 58px/.9 'Barlow Condensed',Impact,sans-serif;
 }
-.thermo:before{
-  content:"";position:absolute;left:35%;top:6%;bottom:13%;
-  width:30%;background:#bdb09a;border-radius:10px;
-}
-.thermo:after{
-  content:"";position:absolute;bottom:-10%;left:5%;width:90%;
-  aspect-ratio:1;background:var(--orange);border:3px solid #e6d7bb;
-  border-radius:50%;box-shadow:inset 0 0 0 2px #a43b28;
-}
-.thermo-fill{
-  position:absolute;left:38%;bottom:14%;width:24%;height:46%;
-  background:var(--orange);border-radius:8px;z-index:2;
-}
-.thermo-ticks{
-  position:absolute;left:75%;top:8%;font-size:8px;line-height:3.3;
-  color:#635742;
-}
-.person-grid{
-  position:absolute;top:44%;left:8%;right:8%;
-  display:grid;grid-template-columns:repeat(10,1fr);gap:7px 5px;
-}
-.person{
-  height:19px;position:relative;filter:drop-shadow(1px 2px 0 #77674c40);
-}
-.person:before{
-  content:"";position:absolute;top:0;left:35%;
-  width:30%;aspect-ratio:1;border-radius:50%;background:var(--ink);
-}
-.person:after{
-  content:"";position:absolute;bottom:0;left:20%;width:60%;height:60%;
-  border-radius:5px 5px 2px 2px;background:var(--ink);
-}
-.person.red:before,.person.red:after{background:var(--orange)}
-.stopwatch{
-  position:absolute;top:42%;left:25%;width:50%;aspect-ratio:1;
-  border-radius:50%;border:8px double #aa997c;
-  background:linear-gradient(145deg,#f3e8d1,#c7b99e);
-  box-shadow:4px 8px 0 #77684b55,inset 0 0 0 5px #e6d9c0;
-}
-.stopwatch:before{
-  content:"";position:absolute;left:42%;top:-13%;width:16%;height:15%;
-  background:#aa997c;border:2px solid #ded0b4;border-radius:4px;
-}
-.dial{
-  position:absolute;inset:12%;border:1px solid #8b7c61;border-radius:50%;
-}
-.dial:before{
-  content:"";position:absolute;left:49%;top:17%;
-  height:34%;width:2px;background:#3e3a32;transform:rotate(32deg);
-  transform-origin:bottom;
-}
-.dial:after{
-  content:"";position:absolute;left:49%;top:48%;
-  height:31%;width:2px;background:var(--orange);transform:rotate(110deg);
-  transform-origin:top;
-}
-.sky{
-  position:absolute;left:0;right:0;bottom:16%;height:35%;
-  background:#b9d0d2;
-}
-.cloud{
-  position:absolute;width:27%;height:8%;border-radius:40px;
-  background:#f0e8d6;box-shadow:0 5px 0 #a6bfc0;
-}
-.city{
-  position:absolute;bottom:16%;left:0;right:0;height:24%;
-  display:flex;align-items:end;gap:3px;
-}
-.building{
-  flex:1;background:#b4a58a;border:1px solid #8b806d;
-  box-shadow:inset 4px 0 #d1c2a7;
-}
-.building:after{
-  content:"";display:block;width:100%;height:100%;
-  background:repeating-linear-gradient(0deg,transparent 0 8px,#776f6044 9px 11px);
-}
-.bus{
-  position:absolute;bottom:11%;left:7%;width:57%;height:10%;
-  background:#4e806a;border:3px solid #d6c5a3;
-  border-radius:7px 12px 4px 4px;
-  box-shadow:0 7px 0 #7d6b4f55;
-}
-.bus:before{
-  content:"";position:absolute;top:12%;left:6%;right:6%;height:40%;
-  background:#c8d8ce;box-shadow:inset 0 0 0 2px #36574b;
-}
-.bus:after{
-  content:"";position:absolute;bottom:-18%;left:12%;width:15%;aspect-ratio:1;
-  background:#282a26;border:3px solid #c8b99a;border-radius:50%;
-  box-shadow:130px 0 0 -1px #282a26;
-}
-.chart{
-  position:absolute;top:48%;left:8%;right:8%;height:26%;
-  border-left:1px solid #a6997e;border-bottom:1px solid #a6997e;
-  background:repeating-linear-gradient(0deg,transparent 0 27px,#a99a7b33 28px 29px);
-}
-.candle{
-  position:absolute;bottom:var(--bottom);left:var(--left);
-  width:5%;height:var(--height);background:var(--c);
-  box-shadow:0 0 0 1px #574d3d20;
-}
-.candle:before{
-  content:"";position:absolute;left:42%;top:-35%;height:170%;
-  width:2px;background:var(--c);
-}
-.profit-number{
-  position:absolute;top:48%;left:5%;right:5%;
-  font:900 clamp(56px,17vw,105px)/.85 'Barlow Condensed',Impact,sans-serif;
-  text-align:center;color:var(--orange);
-  text-shadow:3px 4px 0 #9d3827;
-}
-.screen{
-  position:absolute;top:48%;left:8%;right:8%;height:27%;
-  background:#252923;border:8px solid #8e8066;
-  box-shadow:5px 8px 0 #6b5a3f55,inset 0 0 0 2px #b9a98b;
-}
-.screen .chart{top:12%;left:5%;right:5%;height:75%;border-color:#5d6d5d}
-.screen .candle{background:var(--orange)}
-.screen-label{
-  position:absolute;left:7%;top:5%;color:#e3d6bc;
+.badge-vip span{font-size:10px;letter-spacing:3px;margin-top:8px}
+.small-tag{
+  position:absolute;padding:8px 10px;
+  border:1px solid #9f8d6c;background:#f3e9d5;
   font-size:8px;letter-spacing:1px;
+  box-shadow:2px 3px 0 #85765b33;
 }
-.screen-profit{
-  position:absolute;right:7%;top:9%;font-size:10px;color:#e0a184;
+.tag-a{top:12%;left:5%;transform:rotate(-5deg)}
+.tag-b{bottom:12%;right:4%;transform:rotate(4deg)}
+.tag-green{color:var(--green);font-weight:600}
+.big-question{
+  font:900 120px/.8 'Barlow Condensed',Impact,sans-serif;
+  color:var(--orange);text-shadow:4px 5px 0 #8c492f30;
 }
-.enter{
-  animation:enter .7s both;
+.paper-arrow{
+  position:absolute;right:10%;top:10%;font-size:42px;
+  color:var(--orange);transform:rotate(15deg);
 }
-@keyframes enter{
-  from{transform:translateY(22px);opacity:0}
-  to{transform:translateY(0);opacity:1}
+.bubble{
+  background:#f8f0e0;border:2px solid #b5a486;
+  padding:16px 12px;box-shadow:4px 5px 0 #8c7b5c38;
+  font-size:11px;text-align:center;line-height:1.6;
 }
-.pulse{animation:pulse 1.2s ease-in-out infinite alternate}
-@keyframes pulse{to{transform:scale(1.04);filter:drop-shadow(0 0 10px #c94d3255)}}
-.scene.active .caption{animation:enter .6s .2s both}
-.scene.active h1{animation:enter .7s both}
-@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+.bubble strong{font-size:17px}
+.comment-box{
+  width:100%;padding:15px;background:#f7eedf;
+  border:2px solid #b5a486;box-shadow:4px 5px 0 #8c7b5c38;
+}
+.comment-head{font-size:9px;color:#776b57;border-bottom:1px solid #d5c7ad;padding-bottom:10px}
+.comment-row{display:flex;align-items:center;gap:10px;margin-top:14px}
+.avatar{width:26px;height:26px;background:var(--orange);border-radius:50%;flex-shrink:0}
+.comment-text{font-size:10px;line-height:1.5}
+.link{
+  display:inline-block;background:var(--orange);color:white;
+  padding:6px 8px;margin-top:7px;font-weight:600;
+}
+.cta{
+  position:absolute;left:8%;right:8%;bottom:13%;
+  padding:13px;text-align:center;background:var(--ink);
+  color:var(--paper);font-size:10px;letter-spacing:1px;
+  box-shadow:4px 5px 0 #8d7557;
+}
+.cta b{color:#e48b6b}
+.enter{animation:rise .55s both}
+.pulse{animation:pulse 1s ease-in-out infinite alternate}
+@keyframes rise{
+  from{opacity:0;transform:translateY(18px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes pulse{
+  to{transform:scale(1.05) rotate(-5deg)}
+}
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
 </style>
 </head>
 <body>
-<div id="film">
-  <div class="fold"></div>
-  <div class="topline"><span><b>●</b> TRADE WITH DAKSH</span><span>AI FILE / 001</span></div>
+<div id="video">
+  <div class="grid"></div>
 
-  <!-- Scene 1: late-night discovery -->
-  <section class="scene active" data-duration="3000">
-    <div class="kicker">02:47 AM · UNKNOWN DEVICE</div>
-    <h1>WHO IS<br><span class="red">TRADING</span><br>TONIGHT?</h1>
-    <p class="caption">The room was empty.<br>But the market was still moving.</p>
-    <div class="screen object">
-      <span class="screen-label">MARKET TERMINAL / LIVE</span>
-      <span class="screen-profit">● ACTIVE</span>
-      <div class="chart">
-        <i class="candle" style="--left:5%;--bottom:12%;--height:23%;--c:#d9c7a6"></i>
-        <i class="candle" style="--left:17%;--bottom:20%;--height:34%;--c:#c94d32"></i>
-        <i class="candle" style="--left:29%;--bottom:18%;--height:18%;--c:#d9c7a6"></i>
-        <i class="candle" style="--left:41%;--bottom:28%;--height:31%;--c:#c94d32"></i>
-        <i class="candle" style="--left:53%;--bottom:36%;--height:24%;--c:#d9c7a6"></i>
-        <i class="candle" style="--left:65%;--bottom:42%;--height:30%;--c:#c94d32"></i>
-        <i class="candle" style="--left:77%;--bottom:52%;--height:22%;--c:#c94d32"></i>
-        <i class="candle" style="--left:89%;--bottom:62%;--height:27%;--c:#d9c7a6"></i>
+  <div class="header">
+    <div><div class="line"></div><span class="brand">TOPG VIP LEVELS</span></div>
+    <span class="page" id="page">01 / 05</span>
+  </div>
+
+  <!-- Scene 1: Hook -->
+  <section class="scene active" data-time="4500">
+    <div class="kicker">TRADING KARTE HO? · EK SECOND</div>
+    <h1>TOPG VIP<br>LEVELS<br><span class="orange">FREE MEIN?</span></h1>
+    <p class="copy">
+      Bina broker mein <strong>$200 deposit</strong> kiye
+      VIP levels chahiye?
+    </p>
+    <div class="visual">
+      <div class="card">
+        <span class="small-tag tag-a">VIP ACCESS</span>
+        <div class="badge-vip pulse">
+          <b>VIP</b><span>LEVELS</span>
+        </div>
+        <span class="small-tag tag-b tag-green">FREE ACCESS*</span>
       </div>
     </div>
+    <div class="cta">SUNO, <b>YEH TRICK DEKHO →</b></div>
   </section>
 
-  <!-- Scene 2: the AI is discovered -->
-  <section class="scene" data-duration="2600">
-    <div class="kicker">SYSTEM LOG · 02:47:13</div>
-    <h1>NO ONE<br>WAS AT<br><span class="red">THE DESK.</span></h1>
-    <p class="caption">No mouse movement.<br>No human logged in.</p>
-    <div class="object" style="top:47%;left:23%;font-size:85px;transform:rotate(-12deg)">⌁</div>
-    <div class="object" style="top:52%;left:36%;font-size:100px;color:#b8a98c">⌨</div>
-    <div class="object" style="top:46%;left:58%;font-size:82px;color:#c94d32">?</div>
-  </section>
-
-  <!-- Scene 3: money starts climbing -->
-  <section class="scene" data-duration="3200">
-    <div class="kicker">AUTOMATED POSITION · OPEN</div>
-    <h1>THEN THE<br>PROFIT<br><span class="red">CLIMBED.</span></h1>
-    <p class="caption">A fictional AI-trading story.<br>Watch the account balance.</p>
-    <div class="chart">
-      <i class="candle" style="--left:5%;--bottom:5%;--height:18%;--c:#c94d32"></i>
-      <i class="candle" style="--left:17%;--bottom:13%;--height:23%;--c:#c94d32"></i>
-      <i class="candle" style="--left:29%;--bottom:21%;--height:28%;--c:#c94d32"></i>
-      <i class="candle" style="--left:41%;--bottom:29%;--height:30%;--c:#c94d32"></i>
-      <i class="candle" style="--left:53%;--bottom:39%;--height:25%;--c:#c94d32"></i>
-      <i class="candle" style="--left:65%;--bottom:48%;--height:30%;--c:#c94d32"></i>
-      <i class="candle" style="--left:77%;--bottom:58%;--height:25%;--c:#c94d32"></i>
-      <i class="candle" style="--left:89%;--bottom:69%;--height:25%;--c:#c94d32"></i>
-    </div>
-  </section>
-
-  <!-- Scene 4: the reveal -->
-  <section class="scene" data-duration="3500">
-    <div class="kicker">SESSION RESULT · STORY REVEAL</div>
-    <h1>AI GOT<br>CAUGHT WITH</h1>
-    <div class="profit-number pulse" id="profit">$28K</div>
-    <p class="caption" style="top:66%;text-align:center">
-      What happened at 2:47 AM?<br><b style="color:#c94d32">THE STORY BEGINS.</b>
+  <!-- Scene 2: Problem -->
+  <section class="scene" data-time="4500">
+    <div class="kicker">TRADING STRATEGY · QUICK QUESTION</div>
+    <h1>TOPG KI<br>STRATEGY<br><span class="orange">USE KARTE HO?</span></h1>
+    <p class="copy">
+      Phir bhi losses ho rahe hain?
+      <br><strong>Levels ke saath risk management bhi zaroori hai.</strong>
     </p>
-    <div class="object" style="top:40%;left:20%;font-size:35px;color:#c94d32">✳</div>
-    <div class="object" style="top:40%;right:20%;font-size:35px;color:#c94d32">✳</div>
+    <div class="visual">
+      <div class="card">
+        <div class="big-question">?</div>
+        <span class="small-tag tag-a">PLAN YOUR RISK</span>
+        <span class="small-tag tag-b">STAY DISCIPLINED</span>
+      </div>
+    </div>
+    <div class="cta">CHALO, <b>VIP GROUP DEKHO →</b></div>
   </section>
 
-  <div class="bottomline">
-    <span>FICTIONAL STORY · ENTERTAINMENT</span>
-    <b>STAY CURIOUS ↗</b>
+  <!-- Scene 3: Offer -->
+  <section class="scene" data-time="5000">
+    <div class="kicker">COMMUNITY ACCESS · TOPG VIP</div>
+    <h1>VIP LEVELS<br><span class="orange">MILENGE</span><br>GROUP MEIN</h1>
+    <p class="copy">
+      TopG ke VIP group mein join karo
+      aur available levels ki updates dekho.
+    </p>
+    <div class="visual">
+      <div class="card">
+        <span class="small-tag tag-a">COMMUNITY</span>
+        <div class="bubble">
+          <strong>TOPG VIP GROUP</strong><br>
+          Levels · Updates · Community
+          <div style="color:#52745a;margin-top:10px;font-weight:600">ACCESS DETAILS BELOW</div>
+        </div>
+        <span class="small-tag tag-b">READ GROUP RULES</span>
+      </div>
+    </div>
+    <div class="cta">NO PROFIT GUARANTEE · <b>TRADE RESPONSIBLY</b></div>
+  </section>
+
+  <!-- Scene 4: Pinned comment -->
+  <section class="scene" data-time="5000">
+    <div class="kicker">HOW TO JOIN · STEP 01</div>
+    <h1>COMMENT<br>SECTION<br><span class="orange">OPEN KARO</span></h1>
+    <p class="copy">
+      Maine ek link <strong>pinned comment</strong> mein diya hai.
+      Us par tap karo.
+    </p>
+    <div class="visual">
+      <div class="comment-box">
+        <div class="comment-head">COMMENTS · TOP COMMENT</div>
+        <div class="comment-row">
+          <div class="avatar"></div>
+          <div class="comment-text">
+            TOPG VIP group join link 👇<br>
+            <span class="link">OPEN LINK ↗</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cta">LINK PAR TAP KARO <b>↗</b></div>
+  </section>
+
+  <!-- Scene 5: CTA -->
+  <section class="scene" data-time="6000">
+    <div class="kicker">YOUR NEXT STEP · PINNED COMMENT</div>
+    <h1>JOIN THE<br><span class="orange">VIP GROUP</span></h1>
+    <p class="copy">
+      Link par click karo aur group ke
+      joining instructions follow karo.
+      <br><strong>Bas pinned comment check karo!</strong>
+    </p>
+    <div class="visual">
+      <div class="card">
+        <div class="badge-vip pulse">
+          <b>VIP</b><span>JOIN NOW</span>
+        </div>
+        <span class="small-tag tag-a">TOPG COMMUNITY</span>
+        <span class="small-tag tag-b">LINK IN PINNED COMMENT</span>
+      </div>
+    </div>
+    <div class="cta"><b>LINK IN PINNED COMMENT ↓</b></div>
+  </section>
+
+  <div class="footer">
+    <span>TRADE WITH DAKSH</span>
+    <span>EDUCATION · DISCIPLINE · RISK</span>
   </div>
-  <div class="paper"></div>
+  <div class="grain"></div>
 </div>
 
 <script>
-const scenes=[...document.querySelectorAll('.scene')];
-let index=0;
+const scenes = [...document.querySelectorAll('.scene')];
+const page = document.getElementById('page');
+let index = 0;
 let timer;
 
-function showScene(next){
-  scenes.forEach((scene,i)=>{
-    scene.classList.toggle('active',i===next);
-    scene.querySelectorAll('.object').forEach(el=>{
-      el.classList.remove('enter');
-      void el.offsetWidth;
-      if(i===next)el.classList.add('enter');
-    });
+function showScene(n) {
+  scenes.forEach((scene, i) => {
+    scene.classList.toggle('active', i === n);
+    if (i === n) {
+      scene.querySelectorAll('h1,.copy,.visual,.cta').forEach(el => {
+        el.classList.remove('enter');
+        void el.offsetWidth;
+        el.classList.add('enter');
+      });
+    }
   });
-  index=next;
-  clearTimeout(timer);
-  timer=setTimeout(()=>showScene((index+1)%scenes.length),
-    Number(scenes[index].dataset.duration));
-}
-scenes.forEach((scene,i)=>{
-  scene.style.transition='opacity .45s ease';
-});
-showScene(0);
 
-// Slowly animate the profit number to make the reveal feel alive.
-const profit=document.getElementById('profit');
-let start=null;
-function countUp(now){
-  if(!start)start=now;
-  const p=Math.min(1,(now-start)/1800);
-  if(profit)profit.textContent='$'+Math.floor(28*p)+'K';
-  requestAnimationFrame(countUp);
+  index = n;
+  page.textContent = String(n + 1).padStart(2, '0') + ' / 05';
+
+  clearTimeout(timer);
+  timer = setTimeout(
+    () => showScene((index + 1) % scenes.length),
+    Number(scenes[index].dataset.time)
+  );
 }
-requestAnimationFrame(countUp);
+
+showScene(0);
 </script>
+</div>
 </body>
 </html>
