@@ -3,306 +3,172 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TOPG VIP Levels — Free Access</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TOPG VIP Levels — Trade With Daksh</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=IBM+Plex+Mono:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=IBM+Plex+Mono:wght@400;600&display=swap');
 
-:root{
-  --paper:#f0e8d8;
-  --ink:#171713;
-  --orange:#cc6548;
-  --muted:#9f927b;
-  --green:#52745a;
-}
+:root{--paper:#f0e8d8;--ink:#211f1a;--orange:#cc6548;--muted:#9d8d70;--green:#50745a}
 *{box-sizing:border-box}
-body{
-  margin:0;background:#171713;display:grid;
-  place-items:center;min-height:100vh;
-  font-family:'IBM Plex Mono',monospace;
-}
-#video{
-  width:min(100vw,56.25vh);
-  height:min(177.78vw,100vh);
-  position:relative;overflow:hidden;
-  background:var(--paper);color:var(--ink);
-  isolation:isolate;
-}
-.grid{
-  position:absolute;inset:0;z-index:0;
-  background-image:
-    linear-gradient(#8d80621b 1px,transparent 1px),
-    linear-gradient(90deg,#8d80621b 1px,transparent 1px);
-  background-size:34px 34px;
-}
-.grain{
-  position:absolute;inset:-40%;z-index:8;
-  pointer-events:none;opacity:.15;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
-}
-.header,.footer{
-  position:absolute;z-index:9;left:7%;right:7%;
-  display:flex;justify-content:space-between;
-  align-items:center;font-size:8px;letter-spacing:1px;
-}
-.header{top:4%}
-.footer{bottom:3%;color:#70634e}
+body{margin:0;background:#171713;display:grid;place-items:center;min-height:100vh;font-family:'IBM Plex Mono',monospace}
+#video{width:min(100vw,56.25vh);height:min(177.78vw,100vh);position:relative;overflow:hidden;background:var(--paper);color:var(--ink);isolation:isolate}
+.grid{position:absolute;inset:0;background-image:linear-gradient(#8d80621b 1px,transparent 1px),linear-gradient(90deg,#8d80621b 1px,transparent 1px);background-size:34px 34px}
+.grain{position:absolute;inset:-40%;z-index:8;pointer-events:none;opacity:.13;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E")}
+.header,.footer{position:absolute;z-index:9;left:7%;right:7%;display:flex;justify-content:space-between;align-items:center;font-size:8px;letter-spacing:1px}
+.header{top:4%}.footer{bottom:3%;color:#70634e}
 .line{height:4px;width:30px;background:var(--orange);margin-bottom:8px}
-.brand{font-weight:600}
 .page{color:var(--orange)}
-.scene{
-  position:absolute;inset:0;z-index:2;
-  opacity:0;visibility:hidden;
-  transition:opacity .35s ease;
-}
+.scene{position:absolute;inset:0;z-index:2;opacity:0;visibility:hidden;transition:opacity .4s}
 .scene.active{opacity:1;visibility:visible}
-.kicker{
-  position:absolute;left:8%;right:8%;top:12%;
-  font-size:9px;letter-spacing:1.4px;color:#74654e;
-}
-h1{
-  position:absolute;left:7%;right:5%;top:17%;
-  margin:0;font:900 clamp(48px,14vw,86px)/.84
-  'Barlow Condensed',Impact,sans-serif;
-  letter-spacing:-1px;text-transform:uppercase;
-}
+.kicker{position:absolute;left:8%;right:8%;top:12%;font-size:9px;letter-spacing:1.2px;color:#74654e}
+h1{position:absolute;left:7%;right:5%;top:18%;margin:0;font:900 clamp(47px,13.5vw,83px)/.85 'Barlow Condensed',Impact,sans-serif;letter-spacing:-.7px;text-transform:uppercase}
 .orange{color:var(--orange)}
-.copy{
-  position:absolute;left:8%;right:8%;top:37%;
-  font-size:clamp(11px,3.1vw,15px);
-  line-height:1.7;color:#514938;
-}
+.copy{position:absolute;left:8%;right:8%;top:39%;font-size:clamp(12px,3.25vw,15px);line-height:1.65;color:#514938}
 .copy strong{color:var(--ink)}
-.visual{
-  position:absolute;left:8%;right:8%;top:53%;
-  height:27%;display:flex;align-items:center;
-  justify-content:center;
-}
-.card{
-  width:100%;height:100%;position:relative;
-  background:#e4d8c2;border:2px solid #b4a183;
-  box-shadow:5px 7px 0 #7c6b4b35;
-  display:flex;align-items:center;justify-content:center;
-}
-.badge-vip{
-  width:130px;max-width:65%;aspect-ratio:1;
-  background:var(--orange);color:#fff1db;
-  border:5px double #f0dfbd;
-  border-radius:50%;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  box-shadow:5px 8px 0 #80634455;
-  transform:rotate(-8deg);
-}
-.badge-vip b{
-  font:900 58px/.9 'Barlow Condensed',Impact,sans-serif;
-}
-.badge-vip span{font-size:10px;letter-spacing:3px;margin-top:8px}
-.small-tag{
-  position:absolute;padding:8px 10px;
-  border:1px solid #9f8d6c;background:#f3e9d5;
-  font-size:8px;letter-spacing:1px;
-  box-shadow:2px 3px 0 #85765b33;
-}
-.tag-a{top:12%;left:5%;transform:rotate(-5deg)}
-.tag-b{bottom:12%;right:4%;transform:rotate(4deg)}
-.tag-green{color:var(--green);font-weight:600}
-.big-question{
-  font:900 120px/.8 'Barlow Condensed',Impact,sans-serif;
-  color:var(--orange);text-shadow:4px 5px 0 #8c492f30;
-}
-.paper-arrow{
-  position:absolute;right:10%;top:10%;font-size:42px;
-  color:var(--orange);transform:rotate(15deg);
-}
-.bubble{
-  background:#f8f0e0;border:2px solid #b5a486;
-  padding:16px 12px;box-shadow:4px 5px 0 #8c7b5c38;
-  font-size:11px;text-align:center;line-height:1.6;
-}
-.bubble strong{font-size:17px}
-.comment-box{
-  width:100%;padding:15px;background:#f7eedf;
-  border:2px solid #b5a486;box-shadow:4px 5px 0 #8c7b5c38;
-}
-.comment-head{font-size:9px;color:#776b57;border-bottom:1px solid #d5c7ad;padding-bottom:10px}
-.comment-row{display:flex;align-items:center;gap:10px;margin-top:14px}
-.avatar{width:26px;height:26px;background:var(--orange);border-radius:50%;flex-shrink:0}
-.comment-text{font-size:10px;line-height:1.5}
-.link{
-  display:inline-block;background:var(--orange);color:white;
-  padding:6px 8px;margin-top:7px;font-weight:600;
-}
-.cta{
-  position:absolute;left:8%;right:8%;bottom:13%;
-  padding:13px;text-align:center;background:var(--ink);
-  color:var(--paper);font-size:10px;letter-spacing:1px;
-  box-shadow:4px 5px 0 #8d7557;
-}
+.visual{position:absolute;left:8%;right:8%;top:56%;height:24%;display:flex;align-items:center;justify-content:center}
+.card{width:100%;height:100%;position:relative;background:#e4d8c2;border:2px solid #b4a183;box-shadow:5px 7px 0 #7c6b4b35;display:flex;align-items:center;justify-content:center}
+.badge{width:130px;max-width:62%;aspect-ratio:1;border-radius:50%;background:var(--orange);color:#fff1db;border:5px double #f0dfbd;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:5px 8px 0 #80634455;transform:rotate(-8deg)}
+.badge b{font:900 57px/.9 'Barlow Condensed',Impact,sans-serif}
+.badge span{font-size:9px;letter-spacing:2px;margin-top:8px}
+.tag{position:absolute;padding:8px;background:#f3e9d5;border:1px solid #9f8d6c;font-size:8px;letter-spacing:.7px;box-shadow:2px 3px 0 #85765b33}
+.a{top:12%;left:4%;transform:rotate(-4deg)}
+.b{bottom:12%;right:4%;transform:rotate(3deg)}
+.green{color:var(--green);font-weight:600}
+.comment{width:100%;background:#f7eedf;border:2px solid #b5a486;padding:14px;box-shadow:4px 5px 0 #8c7b5c38}
+.comment-title{font-size:9px;color:#776b57;border-bottom:1px solid #d5c7ad;padding-bottom:10px}
+.comment-row{display:flex;gap:10px;align-items:center;margin-top:14px}
+.avatar{width:26px;height:26px;flex-shrink:0;border-radius:50%;background:var(--orange)}
+.comment-text{font-size:10px;line-height:1.6}
+.link{display:inline-block;background:var(--orange);color:white;padding:6px 9px;margin-top:6px;font-weight:600}
+.timer{font:900 clamp(50px,15vw,90px)/.9 'Barlow Condensed',Impact,sans-serif;color:var(--orange)}
+.cta{position:absolute;left:8%;right:8%;bottom:12%;padding:13px;text-align:center;background:var(--ink);color:var(--paper);font-size:10px;letter-spacing:.7px;box-shadow:4px 5px 0 #8d7557}
 .cta b{color:#e48b6b}
 .enter{animation:rise .55s both}
 .pulse{animation:pulse 1s ease-in-out infinite alternate}
-@keyframes rise{
-  from{opacity:0;transform:translateY(18px)}
-  to{opacity:1;transform:translateY(0)}
-}
-@keyframes pulse{
-  to{transform:scale(1.05) rotate(-5deg)}
-}
-@media(prefers-reduced-motion:reduce){
-  *{animation:none!important;transition:none!important}
-}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{to{transform:scale(1.05) rotate(-5deg)}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <div id="video">
-  <div class="grid"></div>
+<div class="grid"></div>
 
-  <div class="header">
-    <div><div class="line"></div><span class="brand">TOPG VIP LEVELS</span></div>
-    <span class="page" id="page">01 / 05</span>
+<div class="header">
+  <div><div class="line"></div>TRADE WITH DAKSH</div>
+  <span class="page" id="page">01 / 05</span>
+</div>
+
+<!-- Scene 1: Hook -->
+<section class="scene active" data-time="5000">
+  <div class="kicker">EK MINUTE · TRADING COMMUNITY</div>
+  <h1>TOPG VIP<br>LEVELS<br><span class="orange">FREE CHAHIYE?</span></h1>
+  <p class="copy">Bina kisi broker mein <strong>$200 deposit</strong> kare?</p>
+  <div class="visual">
+    <div class="card">
+      <span class="tag a">VIP ACCESS</span>
+      <div class="badge pulse"><b>VIP</b><span>LEVELS</span></div>
+      <span class="tag b green">FREE GROUP*</span>
+    </div>
   </div>
+  <div class="cta">YEH VIDEO END TAK DEKHO <b>→</b></div>
+</section>
 
-  <!-- Scene 1: Hook -->
-  <section class="scene active" data-time="4500">
-    <div class="kicker">TRADING KARTE HO? · EK SECOND</div>
-    <h1>TOPG VIP<br>LEVELS<br><span class="orange">FREE MEIN?</span></h1>
-    <p class="copy">
-      Bina broker mein <strong>$200 deposit</strong> kiye
-      VIP levels chahiye?
-    </p>
-    <div class="visual">
-      <div class="card">
-        <span class="small-tag tag-a">VIP ACCESS</span>
-        <div class="badge-vip pulse">
-          <b>VIP</b><span>LEVELS</span>
-        </div>
-        <span class="small-tag tag-b tag-green">FREE ACCESS*</span>
-      </div>
-    </div>
-    <div class="cta">SUNO, <b>YEH TRICK DEKHO →</b></div>
-  </section>
-
-  <!-- Scene 2: Problem -->
-  <section class="scene" data-time="4500">
-    <div class="kicker">TRADING STRATEGY · QUICK QUESTION</div>
-    <h1>TOPG KI<br>STRATEGY<br><span class="orange">USE KARTE HO?</span></h1>
-    <p class="copy">
-      Phir bhi losses ho rahe hain?
-      <br><strong>Levels ke saath risk management bhi zaroori hai.</strong>
-    </p>
-    <div class="visual">
-      <div class="card">
-        <div class="big-question">?</div>
-        <span class="small-tag tag-a">PLAN YOUR RISK</span>
-        <span class="small-tag tag-b">STAY DISCIPLINED</span>
-      </div>
-    </div>
-    <div class="cta">CHALO, <b>VIP GROUP DEKHO →</b></div>
-  </section>
-
-  <!-- Scene 3: Offer -->
-  <section class="scene" data-time="5000">
-    <div class="kicker">COMMUNITY ACCESS · TOPG VIP</div>
-    <h1>VIP LEVELS<br><span class="orange">MILENGE</span><br>GROUP MEIN</h1>
-    <p class="copy">
-      TopG ke VIP group mein join karo
-      aur available levels ki updates dekho.
-    </p>
-    <div class="visual">
-      <div class="card">
-        <span class="small-tag tag-a">COMMUNITY</span>
-        <div class="bubble">
-          <strong>TOPG VIP GROUP</strong><br>
-          Levels · Updates · Community
-          <div style="color:#52745a;margin-top:10px;font-weight:600">ACCESS DETAILS BELOW</div>
-        </div>
-        <span class="small-tag tag-b">READ GROUP RULES</span>
-      </div>
-    </div>
-    <div class="cta">NO PROFIT GUARANTEE · <b>TRADE RESPONSIBLY</b></div>
-  </section>
-
-  <!-- Scene 4: Pinned comment -->
-  <section class="scene" data-time="5000">
-    <div class="kicker">HOW TO JOIN · STEP 01</div>
-    <h1>COMMENT<br>SECTION<br><span class="orange">OPEN KARO</span></h1>
-    <p class="copy">
-      Maine ek link <strong>pinned comment</strong> mein diya hai.
-      Us par tap karo.
-    </p>
-    <div class="visual">
-      <div class="comment-box">
-        <div class="comment-head">COMMENTS · TOP COMMENT</div>
-        <div class="comment-row">
-          <div class="avatar"></div>
-          <div class="comment-text">
-            TOPG VIP group join link 👇<br>
-            <span class="link">OPEN LINK ↗</span>
-          </div>
+<!-- Scene 2: Link -->
+<section class="scene" data-time="5000">
+  <div class="kicker">STEP 01 · PINNED COMMENT</div>
+  <h1>COMMENT<br>SECTION MEIN<br><span class="orange">EK LINK HAI</span></h1>
+  <p class="copy">Comment section mein ek link hai. Us par click karo.</p>
+  <div class="visual">
+    <div class="comment">
+      <div class="comment-title">COMMENTS · PINNED</div>
+      <div class="comment-row">
+        <div class="avatar"></div>
+        <div class="comment-text">
+          TOPG VIP group join karne ke liye 👇<br>
+          <span class="link">CLICK HERE ↗</span>
         </div>
       </div>
     </div>
-    <div class="cta">LINK PAR TAP KARO <b>↗</b></div>
-  </section>
-
-  <!-- Scene 5: CTA -->
-  <section class="scene" data-time="6000">
-    <div class="kicker">YOUR NEXT STEP · PINNED COMMENT</div>
-    <h1>JOIN THE<br><span class="orange">VIP GROUP</span></h1>
-    <p class="copy">
-      Link par click karo aur group ke
-      joining instructions follow karo.
-      <br><strong>Bas pinned comment check karo!</strong>
-    </p>
-    <div class="visual">
-      <div class="card">
-        <div class="badge-vip pulse">
-          <b>VIP</b><span>JOIN NOW</span>
-        </div>
-        <span class="small-tag tag-a">TOPG COMMUNITY</span>
-        <span class="small-tag tag-b">LINK IN PINNED COMMENT</span>
-      </div>
-    </div>
-    <div class="cta"><b>LINK IN PINNED COMMENT ↓</b></div>
-  </section>
-
-  <div class="footer">
-    <span>TRADE WITH DAKSH</span>
-    <span>EDUCATION · DISCIPLINE · RISK</span>
   </div>
-  <div class="grain"></div>
+  <div class="cta">PINNED COMMENT CHECK KARO <b>↓</b></div>
+</section>
+
+<!-- Scene 3: Join -->
+<section class="scene" data-time="5000">
+  <div class="kicker">STEP 02 · JOIN THE COMMUNITY</div>
+  <h1>JOIN HO JAO<br><span class="orange">TOPG KE</span><br>VIP GROUP MEIN</h1>
+  <p class="copy">Link open karo aur group mein join ho jao. VIP levels ki availability aur group rules check kar lena.</p>
+  <div class="visual">
+    <div class="card">
+      <span class="tag a">TOPG COMMUNITY</span>
+      <div class="badge pulse"><b>VIP</b><span>JOIN GROUP</span></div>
+      <span class="tag b green">GROUP ACCESS</span>
+    </div>
+  </div>
+  <div class="cta">LINK IN PINNED COMMENT <b>↗</b></div>
+</section>
+
+<!-- Scene 4: Limited availability -->
+<section class="scene" data-time="5000">
+  <div class="kicker">IMPORTANT · LIMITED AVAILABILITY</div>
+  <h1>YEH LINK<br><span class="orange">SIRF KUCH</span><br>SAMAY KE LIYE</h1>
+  <p class="copy">Link limited time ke liye available hai — agar yeh offer waqai time-limited hai, toh jaldi check kar lo.</p>
+  <div class="visual">
+    <div class="card">
+      <span class="tag a">LINK STATUS</span>
+      <div class="timer">LIMITED</div>
+      <span class="tag b">CHECK AVAILABILITY</span>
+    </div>
+  </div>
+  <div class="cta">MISS MAT KARO <b>↓</b></div>
+</section>
+
+<!-- Scene 5: Final CTA -->
+<section class="scene" data-time="5000">
+  <div class="kicker">YOUR NEXT STEP</div>
+  <h1>TOPG VIP<br><span class="orange">LEVELS</span><br>FREE MEIN*</h1>
+  <p class="copy">Comment section mein pinned link par click karo aur group ke instructions follow karo.</p>
+  <div class="visual">
+    <div class="card">
+      <div class="badge pulse"><b>VIP</b><span>ACCESS</span></div>
+      <span class="tag a">TRADE WITH DAKSH</span>
+      <span class="tag b">PINNED COMMENT ↓</span>
+    </div>
+  </div>
+  <div class="cta"><b>LINK IN PINNED COMMENT</b> ↓</div>
+</section>
+
+<div class="footer">
+  <span>TRADING INVOLVES RISK</span>
+  <span>TRADE WITH DAKSH</span>
+</div>
+<div class="grain"></div>
 </div>
 
 <script>
-const scenes = [...document.querySelectorAll('.scene')];
-const page = document.getElementById('page');
-let index = 0;
-let timer;
+const scenes=[...document.querySelectorAll('.scene')];
+const page=document.getElementById('page');
+let index=0,timer;
 
-function showScene(n) {
-  scenes.forEach((scene, i) => {
-    scene.classList.toggle('active', i === n);
-    if (i === n) {
-      scene.querySelectorAll('h1,.copy,.visual,.cta').forEach(el => {
+function showScene(n){
+  scenes.forEach((scene,i)=>{
+    scene.classList.toggle('active',i===n);
+    if(i===n){
+      scene.querySelectorAll('h1,.copy,.visual,.cta').forEach(el=>{
         el.classList.remove('enter');
         void el.offsetWidth;
         el.classList.add('enter');
       });
     }
   });
-
-  index = n;
-  page.textContent = String(n + 1).padStart(2, '0') + ' / 05';
-
+  index=n;
+  page.textContent=String(n+1).padStart(2,'0')+' / 05';
   clearTimeout(timer);
-  timer = setTimeout(
-    () => showScene((index + 1) % scenes.length),
-    Number(scenes[index].dataset.time)
-  );
+  timer=setTimeout(()=>showScene((index+1)%scenes.length),
+    Number(scenes[index].dataset.time));
 }
-
 showScene(0);
 </script>
-</div>
 </body>
 </html>
