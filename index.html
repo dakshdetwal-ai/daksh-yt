@@ -3,313 +3,338 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trade With Daksh — AI Trading Scene</title>
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
-  }
-}
-</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trade With Daksh — Paper Motion Film</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=IBM+Plex+Mono:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=IBM+Plex+Mono:wght@400;600&display=swap');
 
+:root {
+  --paper:#e9dfc9;
+  --ink:#25231f;
+  --orange:#c94d32;
+  --shadow:#8b795c;
+}
 *{box-sizing:border-box}
-body{margin:0;overflow:hidden;background:#08090a;color:#eee7da;font-family:'IBM Plex Mono',monospace}
-#scene{position:fixed;inset:0}
-.grain{position:fixed;inset:-50%;pointer-events:none;opacity:.09;z-index:3;
-background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E")}
-.vignette{position:fixed;inset:0;pointer-events:none;z-index:2;background:radial-gradient(ellipse,transparent 20%,#000b 100%)}
-.hud{position:fixed;z-index:4;top:5%;font-size:11px;letter-spacing:2px}
-.left{left:5%}.right{right:5%;text-align:right}
-.line{height:4px;width:38px;background:#d96f4e;margin-bottom:10px}
-small{display:block;color:#aaa194;font-size:9px;margin-top:8px}
-.headline{position:fixed;left:7%;top:28%;z-index:4;animation:appear 1.2s both}
-.eyebrow{color:#d96f4e;font-size:10px;letter-spacing:3px}
-h1{font:900 clamp(60px,10vw,135px)/.78 'Barlow Condensed',Impact,sans-serif;letter-spacing:-3px;margin:20px 0;text-shadow:0 5px 25px #000}
-h1 em{color:#d96f4e;font-style:normal}
-.sub{font-size:clamp(10px,1.2vw,15px);color:#c5bcaf}
-.profit{position:fixed;right:7%;bottom:18%;z-index:4;padding:20px 24px;width:min(290px,38vw);background:#11110fee;border:1px solid #d96f4e99;box-shadow:0 15px 60px #000;opacity:0;transform:translateY(20px);animation:card .8s 2s forwards}
-.label{font-size:10px;letter-spacing:2px;color:#b8afa2}
-.amount{display:block;font:800 clamp(38px,5vw,65px)/1.1 'Barlow Condensed',Impact,sans-serif;margin:10px 0;color:#f2ede3}
-.status{font-size:9px;letter-spacing:1px}
-.status:before{content:"";display:inline-block;width:6px;height:6px;background:#d96f4e;border-radius:50%;margin-right:8px}
-.footer{position:fixed;z-index:4;left:5%;right:5%;bottom:4%;display:flex;justify-content:space-between;font-size:8px;letter-spacing:1.3px;color:#aaa194}
-@keyframes appear{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
-@keyframes card{to{opacity:1;transform:translateY(0)}}
-@media(max-width:600px){.headline{top:30%;left:6%}.profit{right:6%;bottom:17%;width:55vw;padding:12px}.footer span:last-child{display:none}}
+body{
+  margin:0;background:#151515;color:var(--ink);
+  display:grid;place-items:center;min-height:100vh;
+  font-family:'IBM Plex Mono',monospace;
+}
+#film{
+  width:min(100vw,56.25vh);
+  height:min(177.78vw,100vh);
+  aspect-ratio:9/16;
+  position:relative;overflow:hidden;
+  background:var(--paper);
+  box-shadow:0 0 60px #0009;
+  isolation:isolate;
+}
+.paper{
+  position:absolute;inset:0;z-index:8;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.23'/%3E%3C/svg%3E");
+  opacity:.27;mix-blend-mode:multiply;
+}
+.fold{
+  position:absolute;top:0;bottom:0;left:50%;
+  width:2px;background:#a18f6e22;
+  box-shadow:3px 0 7px #6f60401a;z-index:1;
+}
+.topline{
+  position:absolute;left:8%;right:8%;top:5%;
+  display:flex;justify-content:space-between;
+  font-size:clamp(7px,2vw,10px);letter-spacing:1.4px;
+  z-index:6;color:#655a48;
+}
+.topline b{color:var(--orange)}
+.scene{
+  position:absolute;inset:0;opacity:0;
+  pointer-events:none;
+}
+.scene.active{opacity:1}
+.kicker{
+  position:absolute;top:13%;left:8%;right:8%;
+  font-size:clamp(8px,2.2vw,11px);
+  letter-spacing:1.8px;font-weight:600;
+}
+h1{
+  position:absolute;top:16%;left:7%;right:5%;
+  margin:0;font-family:'Barlow Condensed',Impact,sans-serif;
+  font-size:clamp(55px,16vw,100px);
+  line-height:.78;letter-spacing:-1.8px;
+  font-weight:900;text-transform:uppercase;
+}
+h1 .red{color:var(--orange)}
+.caption{
+  position:absolute;top:37%;left:8%;right:8%;
+  font-size:clamp(9px,2.5vw,13px);line-height:1.7;
+  color:#5d5344;
+}
+.bottomline{
+  position:absolute;bottom:4%;left:8%;right:8%;
+  display:flex;justify-content:space-between;
+  font-size:7px;letter-spacing:1px;color:#655a48;
+  z-index:6;
+}
+.bottomline b{color:var(--orange)}
+.scene-no{
+  position:absolute;right:8%;top:9%;
+  font:700 12px 'IBM Plex Mono',monospace;color:#88775e;
+}
+
+/* Paper objects */
+.object{
+  position:absolute;filter:drop-shadow(3px 7px 2px #59493235);
+}
+.thermo{
+  width:13%;height:35%;left:44%;top:43%;
+  border:2px solid #c8b99a;border-radius:30px;
+  background:#e4d8bf;transform:rotate(3deg);
+}
+.thermo:before{
+  content:"";position:absolute;left:35%;top:6%;bottom:13%;
+  width:30%;background:#bdb09a;border-radius:10px;
+}
+.thermo:after{
+  content:"";position:absolute;bottom:-10%;left:5%;width:90%;
+  aspect-ratio:1;background:var(--orange);border:3px solid #e6d7bb;
+  border-radius:50%;box-shadow:inset 0 0 0 2px #a43b28;
+}
+.thermo-fill{
+  position:absolute;left:38%;bottom:14%;width:24%;height:46%;
+  background:var(--orange);border-radius:8px;z-index:2;
+}
+.thermo-ticks{
+  position:absolute;left:75%;top:8%;font-size:8px;line-height:3.3;
+  color:#635742;
+}
+.person-grid{
+  position:absolute;top:44%;left:8%;right:8%;
+  display:grid;grid-template-columns:repeat(10,1fr);gap:7px 5px;
+}
+.person{
+  height:19px;position:relative;filter:drop-shadow(1px 2px 0 #77674c40);
+}
+.person:before{
+  content:"";position:absolute;top:0;left:35%;
+  width:30%;aspect-ratio:1;border-radius:50%;background:var(--ink);
+}
+.person:after{
+  content:"";position:absolute;bottom:0;left:20%;width:60%;height:60%;
+  border-radius:5px 5px 2px 2px;background:var(--ink);
+}
+.person.red:before,.person.red:after{background:var(--orange)}
+.stopwatch{
+  position:absolute;top:42%;left:25%;width:50%;aspect-ratio:1;
+  border-radius:50%;border:8px double #aa997c;
+  background:linear-gradient(145deg,#f3e8d1,#c7b99e);
+  box-shadow:4px 8px 0 #77684b55,inset 0 0 0 5px #e6d9c0;
+}
+.stopwatch:before{
+  content:"";position:absolute;left:42%;top:-13%;width:16%;height:15%;
+  background:#aa997c;border:2px solid #ded0b4;border-radius:4px;
+}
+.dial{
+  position:absolute;inset:12%;border:1px solid #8b7c61;border-radius:50%;
+}
+.dial:before{
+  content:"";position:absolute;left:49%;top:17%;
+  height:34%;width:2px;background:#3e3a32;transform:rotate(32deg);
+  transform-origin:bottom;
+}
+.dial:after{
+  content:"";position:absolute;left:49%;top:48%;
+  height:31%;width:2px;background:var(--orange);transform:rotate(110deg);
+  transform-origin:top;
+}
+.sky{
+  position:absolute;left:0;right:0;bottom:16%;height:35%;
+  background:#b9d0d2;
+}
+.cloud{
+  position:absolute;width:27%;height:8%;border-radius:40px;
+  background:#f0e8d6;box-shadow:0 5px 0 #a6bfc0;
+}
+.city{
+  position:absolute;bottom:16%;left:0;right:0;height:24%;
+  display:flex;align-items:end;gap:3px;
+}
+.building{
+  flex:1;background:#b4a58a;border:1px solid #8b806d;
+  box-shadow:inset 4px 0 #d1c2a7;
+}
+.building:after{
+  content:"";display:block;width:100%;height:100%;
+  background:repeating-linear-gradient(0deg,transparent 0 8px,#776f6044 9px 11px);
+}
+.bus{
+  position:absolute;bottom:11%;left:7%;width:57%;height:10%;
+  background:#4e806a;border:3px solid #d6c5a3;
+  border-radius:7px 12px 4px 4px;
+  box-shadow:0 7px 0 #7d6b4f55;
+}
+.bus:before{
+  content:"";position:absolute;top:12%;left:6%;right:6%;height:40%;
+  background:#c8d8ce;box-shadow:inset 0 0 0 2px #36574b;
+}
+.bus:after{
+  content:"";position:absolute;bottom:-18%;left:12%;width:15%;aspect-ratio:1;
+  background:#282a26;border:3px solid #c8b99a;border-radius:50%;
+  box-shadow:130px 0 0 -1px #282a26;
+}
+.chart{
+  position:absolute;top:48%;left:8%;right:8%;height:26%;
+  border-left:1px solid #a6997e;border-bottom:1px solid #a6997e;
+  background:repeating-linear-gradient(0deg,transparent 0 27px,#a99a7b33 28px 29px);
+}
+.candle{
+  position:absolute;bottom:var(--bottom);left:var(--left);
+  width:5%;height:var(--height);background:var(--c);
+  box-shadow:0 0 0 1px #574d3d20;
+}
+.candle:before{
+  content:"";position:absolute;left:42%;top:-35%;height:170%;
+  width:2px;background:var(--c);
+}
+.profit-number{
+  position:absolute;top:48%;left:5%;right:5%;
+  font:900 clamp(56px,17vw,105px)/.85 'Barlow Condensed',Impact,sans-serif;
+  text-align:center;color:var(--orange);
+  text-shadow:3px 4px 0 #9d3827;
+}
+.screen{
+  position:absolute;top:48%;left:8%;right:8%;height:27%;
+  background:#252923;border:8px solid #8e8066;
+  box-shadow:5px 8px 0 #6b5a3f55,inset 0 0 0 2px #b9a98b;
+}
+.screen .chart{top:12%;left:5%;right:5%;height:75%;border-color:#5d6d5d}
+.screen .candle{background:var(--orange)}
+.screen-label{
+  position:absolute;left:7%;top:5%;color:#e3d6bc;
+  font-size:8px;letter-spacing:1px;
+}
+.screen-profit{
+  position:absolute;right:7%;top:9%;font-size:10px;color:#e0a184;
+}
+.enter{
+  animation:enter .7s both;
+}
+@keyframes enter{
+  from{transform:translateY(22px);opacity:0}
+  to{transform:translateY(0);opacity:1}
+}
+.pulse{animation:pulse 1.2s ease-in-out infinite alternate}
+@keyframes pulse{to{transform:scale(1.04);filter:drop-shadow(0 0 10px #c94d3255)}}
+.scene.active .caption{animation:enter .6s .2s both}
+.scene.active h1{animation:enter .7s both}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
 </style>
 </head>
 <body>
-<div id="scene"></div>
-<div class="grain"></div>
-<div class="vignette"></div>
+<div id="film">
+  <div class="fold"></div>
+  <div class="topline"><span><b>●</b> TRADE WITH DAKSH</span><span>AI FILE / 001</span></div>
 
-<div class="hud left">
-  <div class="line"></div>
-  TRADE WITH DAKSH
-  <small>SCENE 01 / NIGHT SESSION</small>
+  <!-- Scene 1: late-night discovery -->
+  <section class="scene active" data-duration="3000">
+    <div class="kicker">02:47 AM · UNKNOWN DEVICE</div>
+    <h1>WHO IS<br><span class="red">TRADING</span><br>TONIGHT?</h1>
+    <p class="caption">The room was empty.<br>But the market was still moving.</p>
+    <div class="screen object">
+      <span class="screen-label">MARKET TERMINAL / LIVE</span>
+      <span class="screen-profit">● ACTIVE</span>
+      <div class="chart">
+        <i class="candle" style="--left:5%;--bottom:12%;--height:23%;--c:#d9c7a6"></i>
+        <i class="candle" style="--left:17%;--bottom:20%;--height:34%;--c:#c94d32"></i>
+        <i class="candle" style="--left:29%;--bottom:18%;--height:18%;--c:#d9c7a6"></i>
+        <i class="candle" style="--left:41%;--bottom:28%;--height:31%;--c:#c94d32"></i>
+        <i class="candle" style="--left:53%;--bottom:36%;--height:24%;--c:#d9c7a6"></i>
+        <i class="candle" style="--left:65%;--bottom:42%;--height:30%;--c:#c94d32"></i>
+        <i class="candle" style="--left:77%;--bottom:52%;--height:22%;--c:#c94d32"></i>
+        <i class="candle" style="--left:89%;--bottom:62%;--height:27%;--c:#d9c7a6"></i>
+      </div>
+    </div>
+  </section>
+
+  <!-- Scene 2: the AI is discovered -->
+  <section class="scene" data-duration="2600">
+    <div class="kicker">SYSTEM LOG · 02:47:13</div>
+    <h1>NO ONE<br>WAS AT<br><span class="red">THE DESK.</span></h1>
+    <p class="caption">No mouse movement.<br>No human logged in.</p>
+    <div class="object" style="top:47%;left:23%;font-size:85px;transform:rotate(-12deg)">⌁</div>
+    <div class="object" style="top:52%;left:36%;font-size:100px;color:#b8a98c">⌨</div>
+    <div class="object" style="top:46%;left:58%;font-size:82px;color:#c94d32">?</div>
+  </section>
+
+  <!-- Scene 3: money starts climbing -->
+  <section class="scene" data-duration="3200">
+    <div class="kicker">AUTOMATED POSITION · OPEN</div>
+    <h1>THEN THE<br>PROFIT<br><span class="red">CLIMBED.</span></h1>
+    <p class="caption">A fictional AI-trading story.<br>Watch the account balance.</p>
+    <div class="chart">
+      <i class="candle" style="--left:5%;--bottom:5%;--height:18%;--c:#c94d32"></i>
+      <i class="candle" style="--left:17%;--bottom:13%;--height:23%;--c:#c94d32"></i>
+      <i class="candle" style="--left:29%;--bottom:21%;--height:28%;--c:#c94d32"></i>
+      <i class="candle" style="--left:41%;--bottom:29%;--height:30%;--c:#c94d32"></i>
+      <i class="candle" style="--left:53%;--bottom:39%;--height:25%;--c:#c94d32"></i>
+      <i class="candle" style="--left:65%;--bottom:48%;--height:30%;--c:#c94d32"></i>
+      <i class="candle" style="--left:77%;--bottom:58%;--height:25%;--c:#c94d32"></i>
+      <i class="candle" style="--left:89%;--bottom:69%;--height:25%;--c:#c94d32"></i>
+    </div>
+  </section>
+
+  <!-- Scene 4: the reveal -->
+  <section class="scene" data-duration="3500">
+    <div class="kicker">SESSION RESULT · STORY REVEAL</div>
+    <h1>AI GOT<br>CAUGHT WITH</h1>
+    <div class="profit-number pulse" id="profit">$28K</div>
+    <p class="caption" style="top:66%;text-align:center">
+      What happened at 2:47 AM?<br><b style="color:#c94d32">THE STORY BEGINS.</b>
+    </p>
+    <div class="object" style="top:40%;left:20%;font-size:35px;color:#c94d32">✳</div>
+    <div class="object" style="top:40%;right:20%;font-size:35px;color:#c94d32">✳</div>
+  </section>
+
+  <div class="bottomline">
+    <span>FICTIONAL STORY · ENTERTAINMENT</span>
+    <b>STAY CURIOUS ↗</b>
+  </div>
+  <div class="paper"></div>
 </div>
-<div class="hud right">
-  02:47 AM
-  <small>UNAUTHORIZED SESSION DETECTED</small>
-</div>
 
-<div class="headline">
-  <div class="eyebrow">SYSTEM ALERT · LIVE ACCOUNT</div>
-  <h1>AI CAUGHT<br><em>TRADING.</em></h1>
-  <p class="sub">Nobody was at the desk.</p>
-</div>
+<script>
+const scenes=[...document.querySelectorAll('.scene')];
+let index=0;
+let timer;
 
-<div class="profit">
-  <div class="label">SESSION P/L · FICTIONAL STORY</div>
-  <strong class="amount" id="amount">$0</strong>
-  <div class="status">POSITION CLOSED</div>
-</div>
-
-<div class="footer">
-  <span>FICTIONAL STORY · FOR ENTERTAINMENT</span>
-  <span>THE JOURNEY OF A TRADER ↗</span>
-</div>
-
-<script type="module">
-import * as THREE from 'three';
-
-const scene = new THREE.Scene();
-scene.background = new THREE.Color('#08090a');
-scene.fog = new THREE.FogExp2('#08090a',0.045);
-
-const camera = new THREE.PerspectiveCamera(40,innerWidth/innerHeight,.1,100);
-camera.position.set(0,3.2,12);
-
-const renderer = new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(innerWidth,innerHeight);
-renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-renderer.shadowMap.enabled=true;
-renderer.toneMapping=THREE.ACESFilmicToneMapping;
-document.querySelector('#scene').appendChild(renderer.domElement);
-
-scene.add(new THREE.AmbientLight('#aaa9a6',1.5));
-
-const orangeLight=new THREE.PointLight('#d96f4e',90,22);
-orangeLight.position.set(3,4,1);
-scene.add(orangeLight);
-
-const blueLight=new THREE.PointLight('#718baa',45,18);
-blueLight.position.set(-4,3,2);
-scene.add(blueLight);
-
-function material(color,roughness=.65){
- return new THREE.MeshStandardMaterial({color,roughness});
+function showScene(next){
+  scenes.forEach((scene,i)=>{
+    scene.classList.toggle('active',i===next);
+    scene.querySelectorAll('.object').forEach(el=>{
+      el.classList.remove('enter');
+      void el.offsetWidth;
+      if(i===next)el.classList.add('enter');
+    });
+  });
+  index=next;
+  clearTimeout(timer);
+  timer=setTimeout(()=>showScene((index+1)%scenes.length),
+    Number(scenes[index].dataset.duration));
 }
-
-const black=material('#080909');
-const deskMat=material('#20201d');
-const metal=material('#454541',.3);
-const orange=material('#d96f4e');
-
-const floor=new THREE.Mesh(
- new THREE.PlaneGeometry(30,25),material('#111210')
-);
-floor.rotation.x=-Math.PI/2;
-floor.position.y=-1.2;
-floor.receiveShadow=true;
-scene.add(floor);
-
-const grid=new THREE.GridHelper(28,35,'#49372f','#292522');
-grid.position.y=-1.18;
-grid.material.transparent=true;
-grid.material.opacity=.35;
-scene.add(grid);
-
-// Desk
-const desk=new THREE.Mesh(
- new THREE.BoxGeometry(7.5,.22,2.2),deskMat
-);
-desk.position.set(0,-.1,-.2);
-desk.castShadow=true;
-scene.add(desk);
-
-for(const x of [-3.1,3.1]){
- const leg=new THREE.Mesh(
-  new THREE.BoxGeometry(.15,1,.15),metal
- );
- leg.position.set(x,-.7,-.2);
- scene.add(leg);
-}
-
-// Trading monitors and animated candlesticks
-const monitors=[];
-
-function createMonitor(x,y,z,w,h,rotation=0){
- const group=new THREE.Group();
- group.position.set(x,y,z);
- group.rotation.y=rotation;
- scene.add(group);
-
- const frame=new THREE.Mesh(
-  new THREE.BoxGeometry(w+.16,h+.16,.16),black
- );
- group.add(frame);
-
- const screen=new THREE.Mesh(
-  new THREE.PlaneGeometry(w,h),
-  new THREE.MeshBasicMaterial({color:'#0b1717'})
- );
- screen.position.z=.09;
- group.add(screen);
-
- // Chart grid
- for(let i=0;i<5;i++){
-  const line=new THREE.Mesh(
-   new THREE.BoxGeometry(w,.008,.01),
-   new THREE.MeshBasicMaterial({color:'#25403a'})
-  );
-  line.position.set(0,-h/2+i*h/4,.11);
-  group.add(line);
- }
-
- for(let i=0;i<17;i++){
-  const cx=-w*.43+i*(w*.86/16);
-  const cy=-h*.22+Math.sin(i*.8+x)*h*.25+i/16*h*.35;
-  const candleH=.12+(i%4)*.035;
-  const candle=new THREE.Mesh(
-   new THREE.BoxGeometry(.055,candleH,.025),
-   new THREE.MeshBasicMaterial({
-    color:i%3===0?'#d96f4e':'#d7d1c5'
-   })
-  );
-  candle.position.set(cx,cy,.13);
-  group.add(candle);
-
-  const wick=new THREE.Mesh(
-   new THREE.BoxGeometry(.012,candleH*1.7,.018),
-   new THREE.MeshBasicMaterial({color:'#d96f4e'})
-  );
-  wick.position.set(cx,cy,.13);
-  group.add(wick);
- }
-
- const stand=new THREE.Mesh(
-  new THREE.BoxGeometry(.12,.38,.12),metal
- );
- stand.position.set(0,-h/2-.25,0);
- group.add(stand);
-
- const foot=new THREE.Mesh(
-  new THREE.BoxGeometry(.6,.06,.3),metal
- );
- foot.position.set(0,-h/2-.44,0);
- group.add(foot);
-
- monitors.push({group,y});
-}
-
-createMonitor(-2.2,1,-1.2,2.1,1.2,.12);
-createMonitor(.2,1.15,-1.35,2.45,1.4,0);
-createMonitor(2.55,1,-1.1,1.8,1.1,-.15);
-
-// Chair
-const seat=new THREE.Mesh(
- new THREE.BoxGeometry(1.3,.2,.9),black
-);
-seat.position.set(0,-.55,1.55);
-scene.add(seat);
-
-const chairBack=new THREE.Mesh(
- new THREE.BoxGeometry(1.3,1.5,.2),black
-);
-chairBack.position.set(0,.2,2);
-scene.add(chairBack);
-
-// Anonymous AI trader silhouette
-const body=new THREE.Mesh(
- new THREE.CapsuleGeometry(.7,.9,6,12),black
-);
-body.position.set(0,.25,1.1);
-body.scale.set(1.1,1.1,.72);
-scene.add(body);
-
-const head=new THREE.Mesh(
- new THREE.SphereGeometry(.42,20,16),material('#101110')
-);
-head.position.set(0,1.3,.78);
-head.scale.set(.95,1.12,.8);
-scene.add(head);
-
-const hood=new THREE.Mesh(
- new THREE.SphereGeometry(.51,20,16,0,Math.PI*2,0,Math.PI*.72),
- material('#191a18')
-);
-hood.position.set(0,1.38,.82);
-hood.scale.set(1.08,1.1,.9);
-scene.add(hood);
-
-// Terracotta sun disk
-const sun=new THREE.Mesh(
- new THREE.CircleGeometry(2.2,64),
- new THREE.MeshBasicMaterial({
-  color:'#a94831',transparent:true,opacity:.5
- })
-);
-sun.position.set(2.1,2,-3.5);
-scene.add(sun);
-
-// Floating dust
-const count=350;
-const positions=new Float32Array(count*3);
-for(let i=0;i<count;i++){
- positions[i*3]=(Math.random()-.5)*14;
- positions[i*3+1]=Math.random()*7-1;
- positions[i*3+2]=(Math.random()-.5)*8-2;
-}
-const dustGeometry=new THREE.BufferGeometry();
-dustGeometry.setAttribute(
- 'position',new THREE.BufferAttribute(positions,3)
-);
-const dust=new THREE.Points(
- dustGeometry,
- new THREE.PointsMaterial({
-  color:'#d9a18a',size:.025,transparent:true,opacity:.65
- })
-);
-scene.add(dust);
-
-// Animation and profit reveal
-const start=performance.now();
-
-function animate(now){
- requestAnimationFrame(animate);
- const t=(now-start)/1000;
-
- const progress=Math.min(1,Math.max(0,(t-2)/4.5));
- const profit=Math.floor(28000*progress);
- document.querySelector('#amount').textContent=
-  '$'+profit.toLocaleString('en-US');
-
- camera.position.x=Math.sin(t*.22)*.25;
- camera.position.y=3.2+Math.sin(t*.4)*.07;
- camera.position.z=12-Math.min(t,8)*.32;
- camera.lookAt(0,.65,-.1);
-
- orangeLight.intensity=75+Math.sin(t*2.4)*12;
-
- monitors.forEach((m,i)=>{
-  m.group.position.y=m.y+Math.sin(t*1.3+i)*.012;
- });
-
- dust.rotation.y=t*.012;
- renderer.render(scene,camera);
-}
-
-requestAnimationFrame(animate);
-
-addEventListener('resize',()=>{
- camera.aspect=innerWidth/innerHeight;
- camera.updateProjectionMatrix();
- renderer.setSize(innerWidth,innerHeight);
+scenes.forEach((scene,i)=>{
+  scene.style.transition='opacity .45s ease';
 });
+showScene(0);
+
+// Slowly animate the profit number to make the reveal feel alive.
+const profit=document.getElementById('profit');
+let start=null;
+function countUp(now){
+  if(!start)start=now;
+  const p=Math.min(1,(now-start)/1800);
+  if(profit)profit.textContent='$'+Math.floor(28*p)+'K';
+  requestAnimationFrame(countUp);
+}
+requestAnimationFrame(countUp);
 </script>
 </body>
 </html>
