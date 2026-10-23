@@ -1,1178 +1,315 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>The Ostrich That Refused To Walk</title>
-
-<!-- ======================= CSS — STYLING ======================= -->
-<style>
-  :root { color-scheme: dark; }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  html,body{
-    width:100%; height:100%; background:#000; overflow:hidden;
-    font-family:'Segoe UI',Arial,sans-serif;
-  }
-  #stage{
-    width:100vw; height:100vh;
-    display:flex; align-items:center; justify-content:center;
-    background:radial-gradient(circle at 50% 30%, #111 0%, #000 100%);
-  }
-  /* 9:16 vertical "film frame" */
-  #viewport{
-    position:relative;
-    height:100vh;
-    aspect-ratio:9/16;
-    max-width:100vw;
-    background:#0a0a0a;
-    overflow:hidden;
-    box-shadow:0 0 60px rgba(0,0,0,.9);
-  }
-  #viewport canvas{ display:block; width:100% !important; height:100% !important; }
-
-  #vignette{
-    position:absolute; inset:0; pointer-events:none;
-    background:radial-gradient(ellipse at center, rgba(0,0,0,0) 55%, rgba(0,0,0,.55) 100%);
-    mix-blend-mode:multiply;
-  }
-  #grain{
-    position:absolute; inset:0; pointer-events:none; opacity:.04;
-    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-    mix-blend-mode:overlay;
-  }
-  #caption{
-    position:absolute; left:6%; right:6%; bottom:9%;
-    text-align:center; color:#fff;
-    font-size:clamp(13px,3.3vw,21px);
-    font-weight:700; letter-spacing:.03em;
-    text-shadow:0 2px 14px rgba(0,0,0,.9);
-    opacity:0; transition:opacity .9s ease;
-    pointer-events:none;
-  }
-  #caption.show{ opacity:1; }
-
-  #hud{
-    position:absolute; top:10px; left:10px; right:10px;
-    display:flex; justify-content:space-between; align-items:center;
-    color:#bbb; font-size:10px; letter-spacing:.12em;
-    text-transform:uppercase; opacity:.55; pointer-events:none;
-  }
-  #loading{
-    position:absolute; inset:0; z-index:20;
-    display:flex; align-items:center; justify-content:center;
-    flex-direction:column; gap:10px;
-    background:#070707; color:#ccc; font-size:12px; letter-spacing:.15em;
-  }
-  #tapHint{
-    position:absolute; inset:0; z-index:15;
-    display:flex; align-items:center; justify-content:center;
-    background:rgba(0,0,0,.55); color:#fff; font-size:14px;
-    letter-spacing:.05em; cursor:pointer; text-align:center; padding:20px;
-  }
-  #tapHint.hidden{ display:none; }
-  .bar{
-    width:140px; height:3px; background:#222; border-radius:2px; overflow:hidden;
-  }
-  .bar > div{
-    height:100%; width:0%; background:#9fcf6a;
-    transition:width .2s linear;
-  }
-</style>
-</head>
-<body>
-
-<!-- ======================= HTML — STRUCTURE ======================= -->
-<div id="stage">
-  <div id="viewport">
-    <div id="loading">
-      <div>LOADING “THE OSTRICH THAT REFUSED TO WALK”…</div>
-      <div class="bar"><div id="loadBar"></div></div>
-    </div>
-    <div id="tapHint" class="hidden">▶ TAP TO PLAY (enables sound)</div>
-    <div id="vignette"></div>
-    <div id="grain"></div>
-    <div id="hud"><span id="hudTime">00:00 / 00:30</span><span>SCENE: <span id="hudScene">—</span></span></div>
-    <div id="caption">SOME DREAMS NEED WINGS. OTHERS NEED PHYSICS.</div>
-  </div>
-</div>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trade With Daksh — AI Trading Scene</title>
 <script type="importmap">
 {
   "imports": {
-    "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
   }
 }
 </script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=IBM+Plex+Mono:wght@400;600&display=swap');
 
-<!-- ======================= JAVASCRIPT — ANIMATION LOGIC + THREE.JS ======================= -->
+*{box-sizing:border-box}
+body{margin:0;overflow:hidden;background:#08090a;color:#eee7da;font-family:'IBM Plex Mono',monospace}
+#scene{position:fixed;inset:0}
+.grain{position:fixed;inset:-50%;pointer-events:none;opacity:.09;z-index:3;
+background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E")}
+.vignette{position:fixed;inset:0;pointer-events:none;z-index:2;background:radial-gradient(ellipse,transparent 20%,#000b 100%)}
+.hud{position:fixed;z-index:4;top:5%;font-size:11px;letter-spacing:2px}
+.left{left:5%}.right{right:5%;text-align:right}
+.line{height:4px;width:38px;background:#d96f4e;margin-bottom:10px}
+small{display:block;color:#aaa194;font-size:9px;margin-top:8px}
+.headline{position:fixed;left:7%;top:28%;z-index:4;animation:appear 1.2s both}
+.eyebrow{color:#d96f4e;font-size:10px;letter-spacing:3px}
+h1{font:900 clamp(60px,10vw,135px)/.78 'Barlow Condensed',Impact,sans-serif;letter-spacing:-3px;margin:20px 0;text-shadow:0 5px 25px #000}
+h1 em{color:#d96f4e;font-style:normal}
+.sub{font-size:clamp(10px,1.2vw,15px);color:#c5bcaf}
+.profit{position:fixed;right:7%;bottom:18%;z-index:4;padding:20px 24px;width:min(290px,38vw);background:#11110fee;border:1px solid #d96f4e99;box-shadow:0 15px 60px #000;opacity:0;transform:translateY(20px);animation:card .8s 2s forwards}
+.label{font-size:10px;letter-spacing:2px;color:#b8afa2}
+.amount{display:block;font:800 clamp(38px,5vw,65px)/1.1 'Barlow Condensed',Impact,sans-serif;margin:10px 0;color:#f2ede3}
+.status{font-size:9px;letter-spacing:1px}
+.status:before{content:"";display:inline-block;width:6px;height:6px;background:#d96f4e;border-radius:50%;margin-right:8px}
+.footer{position:fixed;z-index:4;left:5%;right:5%;bottom:4%;display:flex;justify-content:space-between;font-size:8px;letter-spacing:1.3px;color:#aaa194}
+@keyframes appear{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes card{to{opacity:1;transform:translateY(0)}}
+@media(max-width:600px){.headline{top:30%;left:6%}.profit{right:6%;bottom:17%;width:55vw;padding:12px}.footer span:last-child{display:none}}
+</style>
+</head>
+<body>
+<div id="scene"></div>
+<div class="grain"></div>
+<div class="vignette"></div>
+
+<div class="hud left">
+  <div class="line"></div>
+  TRADE WITH DAKSH
+  <small>SCENE 01 / NIGHT SESSION</small>
+</div>
+<div class="hud right">
+  02:47 AM
+  <small>UNAUTHORIZED SESSION DETECTED</small>
+</div>
+
+<div class="headline">
+  <div class="eyebrow">SYSTEM ALERT · LIVE ACCOUNT</div>
+  <h1>AI CAUGHT<br><em>TRADING.</em></h1>
+  <p class="sub">Nobody was at the desk.</p>
+</div>
+
+<div class="profit">
+  <div class="label">SESSION P/L · FICTIONAL STORY</div>
+  <strong class="amount" id="amount">$0</strong>
+  <div class="status">POSITION CLOSED</div>
+</div>
+
+<div class="footer">
+  <span>FICTIONAL STORY · FOR ENTERTAINMENT</span>
+  <span>THE JOURNEY OF A TRADER ↗</span>
+</div>
+
 <script type="module">
 import * as THREE from 'three';
 
-/* ============================================================================================
-   GLOBAL TIMELINE CONSTANTS  (seconds) — mirrors the shot script exactly
-   ============================================================================================ */
-const DURATION       = 30;
-const T_WIDE_END      = 2;
-const T_LOOKBIRD_END  = 4;
-const T_CROUCH_END    = 6;
-const T_RUN1_END      = 8;
-const T_JUMP1_END     = 10;
-const T_LAND1_END     = 13;
-const T_NOTICE_END    = 15;
-const T_ATTACH_END    = 17;
-const T_SPREAD_END    = 19;
-const T_RUN2_END      = 21;
-const T_JUMP2_END     = 23;
-const T_GUST_END      = 26;
-const T_PUNCH_END     = 28;
-const T_END           = 30;
-
-const GRAVITY = 9.81 * 0.42; // scaled to world units (world units ~= meters*0.42 for nicer arcs on screen)
-
-/* ============================================================================================
-   RENDERER / SCENE / CAMERA
-   ============================================================================================ */
-const viewport = document.getElementById('viewport');
-const renderer = new THREE.WebGLRenderer({ antialias:true, powerPreference:'high-performance' });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.05;
-viewport.appendChild(renderer.domElement);
-
 const scene = new THREE.Scene();
-const SKY_COLOR = new THREE.Color(0xbfe3ff);
-scene.background = SKY_COLOR;
-scene.fog = new THREE.Fog(SKY_COLOR.getHex(), 18, 60);
+scene.background = new THREE.Color('#08090a');
+scene.fog = new THREE.FogExp2('#08090a',0.045);
 
-const camera = new THREE.PerspectiveCamera(35, 9/16, 0.05, 200);
-camera.position.set(0, 2.2, -6);
+const camera = new THREE.PerspectiveCamera(40,innerWidth/innerHeight,.1,100);
+camera.position.set(0,3.2,12);
 
-function resize(){
-  const w = viewport.clientWidth, h = viewport.clientHeight;
-  renderer.setSize(w, h, false);
-  camera.aspect = w / h;
-  camera.updateProjectionMatrix();
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(innerWidth,innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.shadowMap.enabled=true;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+document.querySelector('#scene').appendChild(renderer.domElement);
+
+scene.add(new THREE.AmbientLight('#aaa9a6',1.5));
+
+const orangeLight=new THREE.PointLight('#d96f4e',90,22);
+orangeLight.position.set(3,4,1);
+scene.add(orangeLight);
+
+const blueLight=new THREE.PointLight('#718baa',45,18);
+blueLight.position.set(-4,3,2);
+scene.add(blueLight);
+
+function material(color,roughness=.65){
+ return new THREE.MeshStandardMaterial({color,roughness});
 }
-new ResizeObserver(resize).observe(viewport);
-resize();
 
-/* ============================================================================================
-   LIGHTING — sun (directional+shadow), sky/ground fill, soft ambient
-   ============================================================================================ */
-const hemi = new THREE.HemisphereLight(0xdcefff, 0x3a2f1e, 0.55);
-scene.add(hemi);
+const black=material('#080909');
+const deskMat=material('#20201d');
+const metal=material('#454541',.3);
+const orange=material('#d96f4e');
 
-const sun = new THREE.DirectionalLight(0xfff3d6, 2.4);
-sun.position.set(-6, 9, -4);
-sun.castShadow = true;
-sun.shadow.mapSize.set(2048, 2048);
-sun.shadow.camera.left = -14; sun.shadow.camera.right = 14;
-sun.shadow.camera.top = 14;   sun.shadow.camera.bottom = -14;
-sun.shadow.camera.near = 1;   sun.shadow.camera.far = 40;
-sun.shadow.bias = -0.0015;
+const floor=new THREE.Mesh(
+ new THREE.PlaneGeometry(30,25),material('#111210')
+);
+floor.rotation.x=-Math.PI/2;
+floor.position.y=-1.2;
+floor.receiveShadow=true;
+scene.add(floor);
+
+const grid=new THREE.GridHelper(28,35,'#49372f','#292522');
+grid.position.y=-1.18;
+grid.material.transparent=true;
+grid.material.opacity=.35;
+scene.add(grid);
+
+// Desk
+const desk=new THREE.Mesh(
+ new THREE.BoxGeometry(7.5,.22,2.2),deskMat
+);
+desk.position.set(0,-.1,-.2);
+desk.castShadow=true;
+scene.add(desk);
+
+for(const x of [-3.1,3.1]){
+ const leg=new THREE.Mesh(
+  new THREE.BoxGeometry(.15,1,.15),metal
+ );
+ leg.position.set(x,-.7,-.2);
+ scene.add(leg);
+}
+
+// Trading monitors and animated candlesticks
+const monitors=[];
+
+function createMonitor(x,y,z,w,h,rotation=0){
+ const group=new THREE.Group();
+ group.position.set(x,y,z);
+ group.rotation.y=rotation;
+ scene.add(group);
+
+ const frame=new THREE.Mesh(
+  new THREE.BoxGeometry(w+.16,h+.16,.16),black
+ );
+ group.add(frame);
+
+ const screen=new THREE.Mesh(
+  new THREE.PlaneGeometry(w,h),
+  new THREE.MeshBasicMaterial({color:'#0b1717'})
+ );
+ screen.position.z=.09;
+ group.add(screen);
+
+ // Chart grid
+ for(let i=0;i<5;i++){
+  const line=new THREE.Mesh(
+   new THREE.BoxGeometry(w,.008,.01),
+   new THREE.MeshBasicMaterial({color:'#25403a'})
+  );
+  line.position.set(0,-h/2+i*h/4,.11);
+  group.add(line);
+ }
+
+ for(let i=0;i<17;i++){
+  const cx=-w*.43+i*(w*.86/16);
+  const cy=-h*.22+Math.sin(i*.8+x)*h*.25+i/16*h*.35;
+  const candleH=.12+(i%4)*.035;
+  const candle=new THREE.Mesh(
+   new THREE.BoxGeometry(.055,candleH,.025),
+   new THREE.MeshBasicMaterial({
+    color:i%3===0?'#d96f4e':'#d7d1c5'
+   })
+  );
+  candle.position.set(cx,cy,.13);
+  group.add(candle);
+
+  const wick=new THREE.Mesh(
+   new THREE.BoxGeometry(.012,candleH*1.7,.018),
+   new THREE.MeshBasicMaterial({color:'#d96f4e'})
+  );
+  wick.position.set(cx,cy,.13);
+  group.add(wick);
+ }
+
+ const stand=new THREE.Mesh(
+  new THREE.BoxGeometry(.12,.38,.12),metal
+ );
+ stand.position.set(0,-h/2-.25,0);
+ group.add(stand);
+
+ const foot=new THREE.Mesh(
+  new THREE.BoxGeometry(.6,.06,.3),metal
+ );
+ foot.position.set(0,-h/2-.44,0);
+ group.add(foot);
+
+ monitors.push({group,y});
+}
+
+createMonitor(-2.2,1,-1.2,2.1,1.2,.12);
+createMonitor(.2,1.15,-1.35,2.45,1.4,0);
+createMonitor(2.55,1,-1.1,1.8,1.1,-.15);
+
+// Chair
+const seat=new THREE.Mesh(
+ new THREE.BoxGeometry(1.3,.2,.9),black
+);
+seat.position.set(0,-.55,1.55);
+scene.add(seat);
+
+const chairBack=new THREE.Mesh(
+ new THREE.BoxGeometry(1.3,1.5,.2),black
+);
+chairBack.position.set(0,.2,2);
+scene.add(chairBack);
+
+// Anonymous AI trader silhouette
+const body=new THREE.Mesh(
+ new THREE.CapsuleGeometry(.7,.9,6,12),black
+);
+body.position.set(0,.25,1.1);
+body.scale.set(1.1,1.1,.72);
+scene.add(body);
+
+const head=new THREE.Mesh(
+ new THREE.SphereGeometry(.42,20,16),material('#101110')
+);
+head.position.set(0,1.3,.78);
+head.scale.set(.95,1.12,.8);
+scene.add(head);
+
+const hood=new THREE.Mesh(
+ new THREE.SphereGeometry(.51,20,16,0,Math.PI*2,0,Math.PI*.72),
+ material('#191a18')
+);
+hood.position.set(0,1.38,.82);
+hood.scale.set(1.08,1.1,.9);
+scene.add(hood);
+
+// Terracotta sun disk
+const sun=new THREE.Mesh(
+ new THREE.CircleGeometry(2.2,64),
+ new THREE.MeshBasicMaterial({
+  color:'#a94831',transparent:true,opacity:.5
+ })
+);
+sun.position.set(2.1,2,-3.5);
 scene.add(sun);
-scene.add(sun.target);
 
-const fill = new THREE.DirectionalLight(0xbcd9ff, 0.3);
-fill.position.set(5, 3, 5);
-scene.add(fill);
+// Floating dust
+const count=350;
+const positions=new Float32Array(count*3);
+for(let i=0;i<count;i++){
+ positions[i*3]=(Math.random()-.5)*14;
+ positions[i*3+1]=Math.random()*7-1;
+ positions[i*3+2]=(Math.random()-.5)*8-2;
+}
+const dustGeometry=new THREE.BufferGeometry();
+dustGeometry.setAttribute(
+ 'position',new THREE.BufferAttribute(positions,3)
+);
+const dust=new THREE.Points(
+ dustGeometry,
+ new THREE.PointsMaterial({
+  color:'#d9a18a',size:.025,transparent:true,opacity:.65
+ })
+);
+scene.add(dust);
 
-/* ============================================================================================
-   ENVIRONMENT — sloped hillside, trail, grass (shader-animated), stones, flowers, distant hills
-   ============================================================================================ */
-const SLOPE = 0.07; // gentle downhill slope along +Z (the direction the ostrich runs)
-function groundHeight(x, z){
-  // gentle hill slope + soft undulation, trail stays mostly flat/compacted
-  return -SLOPE * z + Math.sin(x*0.4)*0.05 + Math.sin(z*0.17)*0.08;
+// Animation and profit reveal
+const start=performance.now();
+
+function animate(now){
+ requestAnimationFrame(animate);
+ const t=(now-start)/1000;
+
+ const progress=Math.min(1,Math.max(0,(t-2)/4.5));
+ const profit=Math.floor(28000*progress);
+ document.querySelector('#amount').textContent=
+  '$'+profit.toLocaleString('en-US');
+
+ camera.position.x=Math.sin(t*.22)*.25;
+ camera.position.y=3.2+Math.sin(t*.4)*.07;
+ camera.position.z=12-Math.min(t,8)*.32;
+ camera.lookAt(0,.65,-.1);
+
+ orangeLight.intensity=75+Math.sin(t*2.4)*12;
+
+ monitors.forEach((m,i)=>{
+  m.group.position.y=m.y+Math.sin(t*1.3+i)*.012;
+ });
+
+ dust.rotation.y=t*.012;
+ renderer.render(scene,camera);
 }
 
-const envGroup = new THREE.Group();
-scene.add(envGroup);
+requestAnimationFrame(animate);
 
-// --- Ground / hillside terrain (displaced plane) ---
-{
-  const segX = 120, segZ = 160;
-  const geo = new THREE.PlaneGeometry(40, 70, segX, segZ);
-  geo.rotateX(-Math.PI/2);
-  const pos = geo.attributes.position;
-  for(let i=0;i<pos.count;i++){
-    const x = pos.getX(i), z = pos.getZ(i);
-    pos.setY(i, groundHeight(x, z));
-  }
-  geo.computeVertexNormals();
-
-  // vertex color: darker dirt trail strip down the middle, green elsewhere
-  const colors = [];
-  for(let i=0;i<pos.count;i++){
-    const x = pos.getX(i);
-    const trail = Math.exp(-Math.pow(x/1.1, 6)); // narrow trail band
-    const green = new THREE.Color(0x4f8a3b).lerp(new THREE.Color(0x6fae4d), Math.random()*0.4);
-    const dirt  = new THREE.Color(0x8a6a44).lerp(new THREE.Color(0x6f5536), Math.random()*0.3);
-    const c = green.clone().lerp(dirt, trail);
-    colors.push(c.r, c.g, c.b);
-  }
-  geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-
-  const mat = new THREE.MeshStandardMaterial({ vertexColors:true, roughness:1.0, metalness:0.0 });
-  const ground = new THREE.Mesh(geo, mat);
-  ground.receiveShadow = true;
-  ground.position.z = 10;
-  envGroup.add(ground);
-  window.__groundMesh = ground; // for rayctable height lookups if needed
-}
-
-// --- Distant rolling hills (atmospheric perspective via fog) ---
-{
-  const hillMat = new THREE.MeshStandardMaterial({ color:0x8fb8e0, roughness:1 });
-  for(let i=0;i<7;i++){
-    const r = 8 + Math.random()*10;
-    const g = new THREE.SphereGeometry(r, 16, 10, 0, Math.PI*2, 0, Math.PI/2);
-    const m = new THREE.Mesh(g, hillMat.clone());
-    m.material.color.offsetHSL(0,0,(Math.random()-0.5)*0.08);
-    m.position.set((Math.random()-0.5)*50, -r*0.75, 28 + Math.random()*20);
-    m.scale.y = 0.35;
-    envGroup.add(m);
-  }
-}
-
-// --- Grass: shader-based instanced blades with wind sway ---
-const grassUniforms = { uTime:{ value:0 }, uWind:{ value:0.35 } };
-const grassMaterial = new THREE.ShaderMaterial({
-  uniforms: grassUniforms,
-  vertexColors: true,
-  side: THREE.DoubleSide,
-  vertexShader:`
-    uniform float uTime;
-    uniform float uWind;
-    attribute float aPhase;
-    attribute float aScale;
-    varying vec3 vColor;
-    void main(){
-      vColor = instanceColor;
-      vec3 pos = position; // local blade: base at y=0, tip at y=1
-      float bend = sin(uTime*1.6 + aPhase) * uWind * pos.y * pos.y;
-      pos.x += bend;
-      pos.z += bend * 0.4;
-      pos *= aScale;
-      vec4 world = instanceMatrix * vec4(pos, 1.0);
-      gl_Position = projectionMatrix * modelViewMatrix * world;
-    }
-  `,
-  fragmentShader:`
-    varying vec3 vColor;
-    void main(){
-      gl_FragColor = vec4(vColor, 1.0);
-    }
-  `
+addEventListener('resize',()=>{
+ camera.aspect=innerWidth/innerHeight;
+ camera.updateProjectionMatrix();
+ renderer.setSize(innerWidth,innerHeight);
 });
-
-function buildGrass(){
-  const bladeGeo = new THREE.PlaneGeometry(0.06, 1, 1, 3);
-  bladeGeo.translate(0, 0.5, 0); // pivot at base
-  const count = 9000;
-  const inst = new THREE.InstancedMesh(bladeGeo, grassMaterial, count);
-  inst.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(count*3), 3);
-
-  const dummy = new THREE.Object3D();
-  const phases = new Float32Array(count);
-  const scales = new Float32Array(count);
-
-  for(let i=0;i<count;i++){
-    let x,z;
-    do {
-      x = (Math.random()-0.5) * 16;
-      z = Math.random() * 60 - 5;
-    } while (Math.exp(-Math.pow(x/1.1,6)) > 0.6); // keep blades off the bare dirt trail
-    const y = groundHeight(x,z);
-    const s = 0.7 + Math.random()*0.8;
-    dummy.position.set(x, y, z);
-    dummy.rotation.y = Math.random()*Math.PI*2;
-    dummy.rotation.z = (Math.random()-0.5)*0.1;
-    dummy.scale.setScalar(s);
-    dummy.updateMatrix();
-    inst.setMatrixAt(i, dummy.matrix);
-
-    const c = new THREE.Color(0x4c8a35).lerp(new THREE.Color(0x7fb356), Math.random());
-    inst.instanceColor.setXYZ(i, c.r, c.g, c.b);
-    phases[i] = Math.random()*Math.PI*2;
-    scales[i] = s;
-  }
-  bladeGeo.setAttribute('aPhase', new THREE.InstancedBufferAttribute(phases, 1));
-  bladeGeo.setAttribute('aScale', new THREE.InstancedBufferAttribute(scales, 1));
-  inst.instanceMatrix.needsUpdate = true;
-  inst.castShadow = false;
-  inst.receiveShadow = false;
-  envGroup.add(inst);
-}
-buildGrass();
-
-// --- Scattered stones ---
-function buildStones(){
-  const geo = new THREE.DodecahedronGeometry(0.12, 0);
-  const mat = new THREE.MeshStandardMaterial({ color:0x8c8c86, roughness:0.9 });
-  const inst = new THREE.InstancedMesh(geo, mat, 40);
-  const dummy = new THREE.Object3D();
-  for(let i=0;i<40;i++){
-    const x = (Math.random()-0.5)*6;
-    const z = Math.random()*55 - 5;
-    const y = groundHeight(x,z);
-    dummy.position.set(x,y+0.03,z);
-    dummy.rotation.set(Math.random()*6,Math.random()*6,Math.random()*6);
-    dummy.scale.setScalar(0.6+Math.random()*1.2);
-    dummy.updateMatrix();
-    inst.setMatrixAt(i, dummy.matrix);
-  }
-  inst.castShadow = true; inst.receiveShadow = true;
-  envGroup.add(inst);
-}
-buildStones();
-
-// --- Wildflowers ---
-function buildFlowers(){
-  const petal = new THREE.SphereGeometry(0.035, 6, 6);
-  const mat = new THREE.MeshStandardMaterial({ roughness:0.6 });
-  const inst = new THREE.InstancedMesh(petal, mat, 160);
-  inst.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(160*3), 3);
-  const dummy = new THREE.Object3D();
-  const hues = [0xffffff, 0xffe08a, 0xff9ab5, 0xc9a7ff];
-  for(let i=0;i<160;i++){
-    const x = (Math.random()-0.5)*7;
-    const z = Math.random()*55 - 5;
-    const y = groundHeight(x,z);
-    dummy.position.set(x,y+0.12,z);
-    dummy.scale.setScalar(0.8+Math.random());
-    dummy.updateMatrix();
-    inst.setMatrixAt(i, dummy.matrix);
-    const c = new THREE.Color(hues[(Math.random()*hues.length)|0]);
-    inst.instanceColor.setXYZ(i, c.r, c.g, c.b);
-  }
-  envGroup.add(inst);
-}
-buildFlowers();
-
-/* ============================================================================================
-   OSTRICH — skeletal hierarchy built from primitives (stand-in for a sculpted/rigged character)
-   ============================================================================================ */
-const MAT = {
-  body:   new THREE.MeshStandardMaterial({ color:0x3b2a20, roughness:0.85 }),
-  dark:   new THREE.MeshStandardMaterial({ color:0x262422, roughness:0.9 }),
-  skin:   new THREE.MeshStandardMaterial({ color:0xd8c6a0, roughness:0.55 }),
-  beak:   new THREE.MeshStandardMaterial({ color:0xff8c23, roughness:0.35 }),
-  eye:    new THREE.MeshStandardMaterial({ color:0x111111, roughness:0.2, metalness:0.4 }),
-  leg:    new THREE.MeshStandardMaterial({ color:0xcf8f55, roughness:0.6 }),
-  leaf:   new THREE.MeshStandardMaterial({ color:0x4fae43, roughness:0.45, side:THREE.DoubleSide }),
-  leafVein: new THREE.MeshStandardMaterial({ color:0x2f7a2a, roughness:0.5 })
-};
-
-function makeFeatherPlume(count, spread, colorMat, lengthScale=1){
-  const g = new THREE.Group();
-  const geo = new THREE.ConeGeometry(0.05, 0.28*lengthScale, 5);
-  for(let i=0;i<count;i++){
-    const m = new THREE.Mesh(geo, colorMat);
-    m.position.set((Math.random()-0.5)*spread, (Math.random()-0.5)*spread*0.5, (Math.random()-0.5)*spread);
-    m.rotation.set(Math.random()*0.6-0.3, Math.random()*6, Math.PI/2 + (Math.random()*0.5-0.25));
-    m.castShadow = true;
-    g.add(m);
-  }
-  return g;
-}
-
-function createLeg(xSign){
-  const hip = new THREE.Group();
-  hip.position.set(xSign*0.32, -0.15, -0.05);
-
-  const thigh = new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.08,0.75,8), MAT.leg);
-  thigh.position.y = -0.37; thigh.castShadow = true;
-  hip.add(thigh);
-
-  const knee = new THREE.Group(); knee.position.y = -0.75;
-  hip.add(knee);
-
-  const shin = new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.04,0.85,8), MAT.leg);
-  shin.position.y = -0.42; shin.castShadow = true;
-  knee.add(shin);
-
-  const ankle = new THREE.Group(); ankle.position.y = -0.85;
-  knee.add(ankle);
-
-  const foot = new THREE.Group();
-  ankle.add(foot);
-  const footBase = new THREE.Mesh(new THREE.BoxGeometry(0.16,0.05,0.1), MAT.leg);
-  footBase.position.set(0,-0.025,0); footBase.castShadow = true;
-  foot.add(footBase);
-  for(const s of [-1,1]){ // two-toed feet
-    const toe = new THREE.Mesh(new THREE.ConeGeometry(0.045,0.32,6), MAT.leg);
-    toe.rotation.x = Math.PI/2.1;
-    toe.position.set(s*0.05, -0.05, 0.2);
-    toe.castShadow = true;
-    foot.add(toe);
-  }
-
-  return { hip, knee, ankle, foot };
-}
-
-function createWing(xSign){
-  const pivot = new THREE.Group();
-  pivot.position.set(xSign*0.55, 0.15, -0.1);
-
-  const wingGeo = new THREE.PlaneGeometry(0.5, 0.9, 4, 6);
-  // gentle curve to the wing surface
-  const pA = wingGeo.attributes.position;
-  for(let i=0;i<pA.count;i++){
-    const y = pA.getY(i);
-    pA.setZ(i, Math.sin((y+0.45)/0.9 * Math.PI) * 0.08);
-  }
-  wingGeo.computeVertexNormals();
-  const wingMesh = new THREE.Mesh(wingGeo, MAT.dark);
-  wingMesh.position.set(xSign*0.22, -0.4, 0);
-  wingMesh.rotation.y = xSign>0 ? -0.2 : 0.2;
-  wingMesh.castShadow = true;
-  pivot.add(wingMesh);
-
-  const plume = makeFeatherPlume(10, 0.35, MAT.dark, 0.8);
-  plume.position.set(xSign*0.3,-0.75,0);
-  pivot.add(plume);
-
-  return { pivot, mesh: wingMesh };
-}
-
-function createOstrich(){
-  const root = new THREE.Group();
-
-  // --- Body ---
-  const body = new THREE.Mesh(new THREE.SphereGeometry(0.75, 20, 16), MAT.body);
-  body.scale.set(1.15, 0.95, 1.35);
-  body.position.y = 1.05;
-  body.castShadow = true; body.receiveShadow = true;
-  root.add(body);
-
-  const tail = makeFeatherPlume(16, 0.5, MAT.dark, 1.3);
-  tail.position.set(0, 1.25, -0.95);
-  root.add(tail);
-
-  // --- Neck (3-segment chain for believable S-curve) ---
-  const neckPivots = [];
-  let parent = body;
-  let attachPoint = new THREE.Vector3(0, 0.55, 0.65);
-  const neckSegLen = [0.5, 0.45, 0.35];
-  for(let i=0;i<3;i++){
-    const pivot = new THREE.Group();
-    pivot.position.copy(i===0 ? attachPoint : new THREE.Vector3(0, neckSegLen[i-1], 0));
-    const seg = new THREE.Mesh(new THREE.CylinderGeometry(0.11-i*0.02,0.1-i*0.02, neckSegLen[i], 10), MAT.skin);
-    seg.position.y = neckSegLen[i]/2;
-    seg.castShadow = true;
-    pivot.add(seg);
-    parent.add(pivot);
-    parent = pivot;
-    neckPivots.push(pivot);
-  }
-
-  // --- Head ---
-  const head = new THREE.Group();
-  head.position.y = neckSegLen[2];
-  parent.add(head);
-
-  const skull = new THREE.Mesh(new THREE.SphereGeometry(0.14,14,12), MAT.skin);
-  skull.position.set(0,0.1,0.05);
-  skull.castShadow = true;
-  head.add(skull);
-
-  const beak = new THREE.Mesh(new THREE.ConeGeometry(0.06,0.22,8), MAT.beak);
-  beak.rotation.x = Math.PI/2;
-  beak.position.set(0,0.1,0.22);
-  beak.castShadow = true;
-  head.add(beak);
-
-  const eyeGeo = new THREE.SphereGeometry(0.028,8,8);
-  const eyeL = new THREE.Mesh(eyeGeo, MAT.eye); eyeL.position.set(0.11,0.14,0.11);
-  const eyeR = new THREE.Mesh(eyeGeo, MAT.eye); eyeR.position.set(-0.11,0.14,0.11);
-  head.add(eyeL, eyeR);
-
-  // --- Wings ---
-  const wingL = createWing(1);
-  const wingR = createWing(-1);
-  body.add(wingL.pivot, wingR.pivot);
-  wingL.pivot.position.y = wingR.pivot.position.y = 0.25;
-
-  // --- Legs ---
-  const legL = createLeg(1);
-  const legR = createLeg(-1);
-  root.add(legL.hip, legR.hip);
-  legL.hip.position.y = legR.hip.position.y = 0.85;
-
-  scene.add(root);
-
-  return { root, body, neckPivots, head, eyeL, eyeR, wingL, wingR, legL, legR, tail };
-}
-
-const ostrich = createOstrich();
-ostrich.root.position.set(0, 0, 0);
-
-/* ============================================================================================
-   LEAVES — two broad leaves usable as improvised wings, with vein geometry + droop/flutter
-   ============================================================================================ */
-function createLeafGeometry(){
-  const shape = new THREE.Shape();
-  shape.moveTo(0,0);
-  shape.bezierCurveTo(0.35,0.08, 0.55,0.5, 0.0,1.15);
-  shape.bezierCurveTo(-0.55,0.5, -0.35,0.08, 0,0);
-  const geo = new THREE.ShapeGeometry(shape, 12);
-  return geo;
-}
-function createLeaf(){
-  const geo = createLeafGeometry();
-  const mesh = new THREE.Mesh(geo, MAT.leaf.clone());
-  mesh.castShadow = true;
-  // central vein
-  const veinGeo = new THREE.BoxGeometry(0.02, 1.1, 0.01);
-  const vein = new THREE.Mesh(veinGeo, MAT.leafVein);
-  vein.position.set(0, 0.55, 0.01);
-  mesh.add(vein);
-  const group = new THREE.Group();
-  group.add(mesh);
-  mesh.position.y = 0; // pivot at stem base
-  return { group, mesh, bendVel:0, bendAmt:0 };
-}
-
-const leafL = createLeaf();
-const leafR = createLeaf();
-const leafRestPos = { // beside the trail, ground position
-  L: new THREE.Vector3(0.9, 0, 4.2),
-  R: new THREE.Vector3(-1.0, 0, 4.6)
-};
-scene.add(leafL.group, leafR.group);
-
-// Free-flight physics state used only after detachment (scene 4 gust)
-const leafPhysics = {
-  L: { pos:new THREE.Vector3(), vel:new THREE.Vector3(), rot:new THREE.Euler(), angVel:new THREE.Vector3(), active:false },
-  R: { pos:new THREE.Vector3(), vel:new THREE.Vector3(), rot:new THREE.Euler(), angVel:new THREE.Vector3(), active:false }
-};
-
-function resetLeaves(){
-  leafL.group.position.copy(leafRestPos.L);
-  leafR.group.position.copy(leafRestPos.R);
-  leafL.group.rotation.set(0,0.3,0);
-  leafR.group.rotation.set(0,-0.3,0);
-  leafL.group.scale.setScalar(1);
-  leafR.group.scale.setScalar(1);
-  if(leafL.group.parent !== scene) scene.attach(leafL.group);
-  if(leafR.group.parent !== scene) scene.attach(leafR.group);
-  leafPhysics.L.active = false;
-  leafPhysics.R.active = false;
-}
-resetLeaves();
-
-/* ============================================================================================
-   AUDIO — lightweight synthesized SFX (footsteps, flaps, impacts, wind, comedic sting)
-   ============================================================================================ */
-let audioCtx = null, musicGain = null;
-function initAudio(){
-  if(audioCtx) return;
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  musicGain = audioCtx.createGain();
-  musicGain.gain.value = 0.18;
-  musicGain.connect(audioCtx.destination);
-  startWindBed();
-}
-function noiseBuffer(dur=0.3){
-  const n = audioCtx.sampleRate*dur;
-  const buf = audioCtx.createBuffer(1, n, audioCtx.sampleRate);
-  const d = buf.getChannelData(0);
-  for(let i=0;i<n;i++) d[i] = (Math.random()*2-1) * (1-i/n);
-  return buf;
-}
-function playNoise(duration, filterFreq, gainVal, type='lowpass'){
-  if(!audioCtx) return;
-  const src = audioCtx.createBufferSource();
-  src.buffer = noiseBuffer(duration);
-  const filt = audioCtx.createBiquadFilter();
-  filt.type = type; filt.frequency.value = filterFreq;
-  const g = audioCtx.createGain(); g.gain.value = gainVal;
-  src.connect(filt); filt.connect(g); g.connect(audioCtx.destination);
-  src.start();
-}
-function playFootstep(){ playNoise(0.12, 500, 0.5); }
-function playFlap(hard=false){ playNoise(hard?0.3:0.18, hard?1800:1200, hard?0.45:0.3,'bandpass'); }
-function playLeafFlap(){ playNoise(0.22, 2600, 0.35,'highpass'); }
-function playImpact(){ 
-  playNoise(0.25, 220, 0.55);
-  const osc = audioCtx.createOscillator(); osc.type='sine'; osc.frequency.value=90;
-  const g = audioCtx.createGain(); g.gain.value=0.5;
-  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.3);
-  osc.connect(g); g.connect(audioCtx.destination);
-  osc.start(); osc.stop(audioCtx.currentTime+0.3);
-}
-function playSting(freqs){
-  freqs.forEach((f,i)=>{
-    const osc = audioCtx.createOscillator(); osc.type='triangle'; osc.frequency.value=f;
-    const g = audioCtx.createGain(); g.gain.value=0.001;
-    g.gain.linearRampToValueAtTime(0.25, audioCtx.currentTime+i*0.08+0.01);
-    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+i*0.08+0.3);
-    osc.connect(g); g.connect(audioCtx.destination);
-    osc.start(audioCtx.currentTime+i*0.08);
-    osc.stop(audioCtx.currentTime+i*0.08+0.35);
-  });
-}
-let windSrc;
-function startWindBed(){
-  windSrc = audioCtx.createBufferSource();
-  const buf = audioCtx.createBuffer(1, audioCtx.sampleRate*2, audioCtx.sampleRate);
-  const d = buf.getChannelData(0);
-  for(let i=0;i<d.length;i++) d[i] = (Math.random()*2-1)*0.5;
-  windSrc.buffer = buf; windSrc.loop = true;
-  const filt = audioCtx.createBiquadFilter(); filt.type='lowpass'; filt.frequency.value=400;
-  const g = audioCtx.createGain(); g.gain.value = 0.05;
-  windSrc.connect(filt); filt.connect(g); g.connect(audioCtx.destination);
-  windSrc.start();
-}
-
-// one-shot scheduled SFX (keyed by the authoritative timeline, triggered on crossing)
-const scheduledSFX = [
-  { t:2.0, fn:()=>{} },
-  { t:8.05, fn:()=>playFlap(true) },
-  { t:10.1, fn:()=>playImpact() },
-  { t:12.8, fn:()=>playNoise(0.2,300,0.3) }, // embarrassed sigh (soft noise)
-  { t:17.2, fn:()=>playLeafFlap() },
-  { t:17.6, fn:()=>playLeafFlap() },
-  { t:21.05, fn:()=>playFlap(true) },
-  { t:21.1, fn:()=>playLeafFlap() },
-  { t:23.4, fn:()=>playNoise(0.4, 800, 0.3,'highpass') }, // gust
-  { t:25.9, fn:()=>playImpact() },
-  { t:27.3, fn:()=>playSting([300,250]) },
-  { t:29.6, fn:()=>playSting([400,500,650]) }
-];
-
-/* ============================================================================================
-   CAMERA KEYFRAMES — scripted cinematography matching each beat
-   ============================================================================================ */
-function smooth(t){ return t*t*(3-2*t); }
-function lerpVec(a,b,t,out=new THREE.Vector3()){ return out.set(
-  THREE.MathUtils.lerp(a[0],b[0],t),
-  THREE.MathUtils.lerp(a[1],b[1],t),
-  THREE.MathUtils.lerp(a[2],b[2],t)
-);}
-
-// keyframes: time, cam position, look-at target, fov
-const camKeys = [
-  { t:0,    pos:[2.2,2.3,-6.5], look:[0,1.0,0],    fov:35 },
-  { t:2,    pos:[0.6,1.8,-3.0], look:[0,1.3,0.5],  fov:32 }, // dolly in
-  { t:2.2,  pos:[0.3,2.0,-1.6], look:[0,2.3,2.0],  fov:28 }, // looks up at bird
-  { t:3.3,  pos:[0.3,1.3,-1.4], look:[0,0.6,0.0],  fov:28 }, // looks at own wing
-  { t:4.0,  pos:[1.6,1.1,-2.2], look:[0,0.9,0.4],  fov:30 }, // confident crouch pose
-  { t:6.0,  pos:[1.4,1.2,-1.0], look:[0,1.0,2.0],  fov:30 }, // run start - tracking
-  { t:8.0,  pos:[1.6,1.0,2.8],  look:[0,1.1,5.0],  fov:30 }, // tracking along trail
-  { t:8.6,  pos:[0.2,0.6,4.6],  look:[0,1.6,6.0],  fov:28 }, // low angle jump
-  { t:9.6,  pos:[0.1,0.9,5.3],  look:[0,1.7,6.6],  fov:26 }, // slow-mo peak
-  { t:10.6, pos:[1.0,1.1,6.4],  look:[0,0.9,7.2],  fov:30 }, // descent/stumble
-  { t:12.5, pos:[0.6,0.8,7.4],  look:[0,0.5,7.6],  fov:34 }, // faceplant close
-  { t:13.5, pos:[0.9,0.9,7.0],  look:[1.0,0.3,7.8],fov:32 }, // notices leaves
-  { t:15.5, pos:[0.4,1.1,7.3],  look:[0,1.0,7.6],  fov:30 }, // attaching leaves
-  { t:17.3, pos:[0.0,1.1,6.2],  look:[0,1.1,7.6],  fov:30 }, // confident grin close
-  { t:18.3, pos:[0.0,0.35,6.6], look:[0,1.4,7.8],  fov:26 }, // low-angle leaves hero shot
-  { t:19.0, pos:[1.5,1.1,7.2],  look:[0,1.1,9.0],  fov:30 }, // run 2 tracking
-  { t:21.0, pos:[1.7,0.9,10.8], look:[0,1.2,12.5], fov:30 },
-  { t:21.6, pos:[0.2,0.5,12.2], look:[0,1.8,13.4], fov:27 }, // low angle jump 2
-  { t:22.5, pos:[0.1,1.0,13.0], look:[0,1.9,13.8], fov:25 }, // slow-mo peak 2
-  { t:23.6, pos:[0.9,1.1,13.9], look:[0,1.4,14.6], fov:30 }, // gust / fold
-  { t:25.8, pos:[0.6,0.8,15.0], look:[0,0.5,15.2], fov:33 }, // landing
-  { t:26.2, pos:[0.2,0.7,14.7], look:[0,0.55,15.1],fov:30 }, // close-up lying down
-  { t:28.0, pos:[1.6,1.2,14.2], look:[0,1.0,15.6], fov:30 }, // stands, looks at camera
-  { t:30,   pos:[3.0,1.6,13.0], look:[0,1.0,17.5], fov:34 }, // pulls back, walks away
-];
-
-function getCamState(t){
-  let k0 = camKeys[0], k1 = camKeys[camKeys.length-1];
-  for(let i=0;i<camKeys.length-1;i++){
-    if(t >= camKeys[i].t && t <= camKeys[i+1].t){ k0 = camKeys[i]; k1 = camKeys[i+1]; break; }
-  }
-  const span = Math.max(0.0001, k1.t - k0.t);
-  const localT = smooth(THREE.MathUtils.clamp((t - k0.t)/span, 0, 1));
-  return {
-    pos: lerpVec(k0.pos, k1.pos, localT),
-    look: lerpVec(k0.look, k1.look, localT),
-    fov: THREE.MathUtils.lerp(k0.fov, k1.fov, localT)
-  };
-}
-
-/* ============================================================================================
-   OSTRICH STATE (persists across frames within one loop) — position, velocity, flags
-   ============================================================================================ */
-const state = {
-  z:0, y:0, x:0,
-  vz:0, vy:0,
-  pitch:0, roll:0,
-  crouch:0,
-  legCyclePhase:0,
-  leavesAttached:false,
-  lastT:-1,
-  firedSFX:new Set(),
-  bobble:0
-};
-
-function resetState(){
-  state.z=0; state.y=0; state.x=0; state.vz=0; state.vy=0;
-  state.pitch=0; state.roll=0; state.crouch=0; state.legCyclePhase=0;
-  state.leavesAttached=false; state.firedSFX.clear();
-  resetLeaves();
-  ostrich.root.position.set(0,0,0);
-  ostrich.root.rotation.set(0,0,0);
-}
-resetState();
-
-/* ============================================================================================
-   PROCEDURAL ANIMATION HELPERS
-   ============================================================================================ */
-function applyLegCycle(pair, phase, strideLen=0.55, liftH=0.28, crouch=0){
-  const { hip, knee, ankle } = pair;
-  const swing = Math.sin(phase);
-  const lift  = Math.max(0, Math.sin(phase)) * liftH;
-  hip.rotation.x = swing * 0.9 - crouch*0.4;
-  knee.rotation.x = -Math.max(0, Math.sin(phase + 0.5)) * 1.4 - crouch*0.6;
-  ankle.rotation.x = Math.max(0, -swing) * 0.6 + crouch*0.3;
-  hip.position.y = 0.85 + lift*0.15;
-}
-
-function applyIdleLeg(pair, crouch=0){
-  pair.hip.rotation.x = -crouch*0.5;
-  pair.knee.rotation.x = -crouch*0.7;
-  pair.ankle.rotation.x = crouch*0.3;
-}
-
-function applyWingFlap(wing, t, freq, amp, base=0){
-  wing.pivot.rotation.z = base + Math.sin(t*freq)*amp;
-  wing.pivot.rotation.x = Math.sin(t*freq*0.5)*0.1;
-}
-
-function neckLook(pivots, targetPitchList, headTiltX=0){
-  pivots.forEach((p,i)=>{ p.rotation.x = targetPitchList[i] ?? 0; });
-}
-
-// critically-damped spring for leaf lag (secondary motion from mass + drag)
-function springTowards(current, target, vel, stiffness, damping, dt){
-  const accel = (target-current)*stiffness - vel*damping;
-  vel += accel*dt;
-  current += vel*dt;
-  return [current, vel];
-}
-const leafSpring = { Lx:0, Lxv:0, Rx:0, Rxv:0 };
-
-/* ============================================================================================
-   MAIN TIMELINE — computes the entire pose of the world for a given time t (0..30)
-   ============================================================================================ */
-function updateTimeline(t, dt){
-
-  // ---- detect loop wrap -> reset all stateful physics ----
-  if(t < state.lastT){ resetState(); }
-  state.lastT = t;
-
-  // blink timing (independent of scene, purely cosmetic)
-  const blink = (Math.sin(t*2.1) > 0.985) ? 0.05 : 1.0;
-  ostrich.eyeL.scale.y = blink; ostrich.eyeR.scale.y = blink;
-
-  // breathing idle
-  const breathe = Math.sin(t*2.4)*0.015;
-
-  let sceneName = '';
-
-  // ================= SCENE 1: THE BIG IDEA (0-6s) =================
-  if(t < T_WIDE_END){
-    sceneName = 'Scene 1 — Establishing';
-    neckLook(ostrich.neckPivots, [0.1,0.05,0]);
-    applyIdleLeg(ostrich.legL); applyIdleLeg(ostrich.legR);
-    applyWingFlap(ostrich.wingL, t, 1.2, 0.03);
-    applyWingFlap(ostrich.wingR, t, 1.2, 0.03);
-    ostrich.body.position.y = 1.05 + breathe;
-
-  } else if(t < T_LOOKBIRD_END){
-    sceneName = 'Scene 1 — Spots the bird';
-    const lt = (t - T_WIDE_END) / (T_LOOKBIRD_END - T_WIDE_END);
-    // look up at bird then down at own wing
-    const up = smooth(THREE.MathUtils.clamp(lt*2,0,1));
-    const down = smooth(THREE.MathUtils.clamp((lt-0.5)*2,0,1));
-    const pitch = THREE.MathUtils.lerp(0, -0.9, up) + THREE.MathUtils.lerp(0, 1.3, down);
-    neckLook(ostrich.neckPivots, [pitch*0.4, pitch*0.4, pitch*0.3]);
-    applyIdleLeg(ostrich.legL); applyIdleLeg(ostrich.legR);
-    applyWingFlap(ostrich.wingL, t, 1.2, 0.03);
-    applyWingFlap(ostrich.wingR, t, 1.2, 0.03);
-
-  } else if(t < T_CROUCH_END){
-    sceneName = 'Scene 1 — Confident crouch & prep';
-    const lt = smooth((t - T_LOOKBIRD_END)/(T_CROUCH_END - T_LOOKBIRD_END));
-    state.crouch = lt;
-    neckLook(ostrich.neckPivots, [0.3*lt,0.2*lt,0]);
-    ostrich.body.position.y = 1.05 - lt*0.18;
-    ostrich.root.rotation.x = lt*0.12;
-    applyIdleLeg(ostrich.legL, lt); applyIdleLeg(ostrich.legR, lt);
-    ostrich.wingL.pivot.rotation.z = THREE.MathUtils.lerp(0, 0.9, lt);
-    ostrich.wingR.pivot.rotation.z = THREE.MathUtils.lerp(0, -0.9, lt);
-    // small preparatory shuffle steps near the end
-    if(lt > 0.6){
-      const shuffle = Math.sin((lt-0.6)*40)*0.3;
-      ostrich.legL.hip.rotation.x = shuffle;
-      ostrich.legR.hip.rotation.x = -shuffle;
-    }
-
-  // ================= SCENE 2: FIRST FLIGHT ATTEMPT (6-13s) =================
-  } else if(t < T_RUN1_END){
-    sceneName = 'Scene 2 — Running start';
-    const lt = (t - T_CROUCH_END)/(T_RUN1_END - T_CROUCH_END);
-    const speed = THREE.MathUtils.lerp(2.0, 9.0, lt); // accelerating
-    state.vz = speed;
-    state.z += speed*dt;
-    state.legCyclePhase += dt * speed * 3.2;
-    applyLegCycle(ostrich.legL, state.legCyclePhase, 0.6, 0.3);
-    applyLegCycle(ostrich.legR, state.legCyclePhase + Math.PI, 0.6, 0.3);
-    applyWingFlap(ostrich.wingL, t, 14, 0.5);
-    applyWingFlap(ostrich.wingR, t, 14, 0.5);
-    neckLook(ostrich.neckPivots, [-0.2,-0.15,-0.1]);
-    ostrich.root.rotation.x = 0.12;
-    ostrich.root.position.y = groundHeight(0, state.z) + Math.abs(Math.sin(state.legCyclePhase*2))*0.04;
-    // footstep SFX on cycle crossings
-    fireFootstepSFX(state.legCyclePhase);
-
-  } else if(t < T_JUMP1_END){
-    sceneName = 'Scene 2 — Jump & failed flight (slow-mo peak)';
-    const lt = (t - T_RUN1_END)/(T_JUMP1_END - T_RUN1_END);
-    // ballistic jump: v0 chosen for a short, low hop only
-    const v0y = 3.2, v0z = 6.5;
-    const jumpT = lt * 1.0; // local jump time
-    state.y = Math.max(0, v0y*jumpT - 0.5*GRAVITY*jumpT*jumpT);
-    state.z += v0z*dt;
-    ostrich.root.position.y = groundHeight(0,state.z) + state.y;
-    ostrich.root.rotation.x = 0.2 + lt*0.15;
-    // frantic desperate flapping — fast but ineffective
-    applyWingFlap(ostrich.wingL, t, 26, 0.8);
-    applyWingFlap(ostrich.wingR, t, 26, 0.8);
-    neckLook(ostrich.neckPivots, [-0.3,-0.2,-0.1]);
-    // legs tucked/extended mid-air
-    ostrich.legL.hip.rotation.x = 0.5; ostrich.legL.knee.rotation.x = -0.6;
-    ostrich.legR.hip.rotation.x = 0.5; ostrich.legR.knee.rotation.x = -0.6;
-    fireSFX(t, 8.05);
-
-  } else if(t < T_LAND1_END){
-    sceneName = 'Scene 2 — Stumble, fall, embarrassment';
-    const lt = (t - T_JUMP1_END)/(T_LAND1_END - T_JUMP1_END);
-    if(lt < 0.25){
-      // descending fast
-      const dT = lt/0.25;
-      state.y = THREE.MathUtils.lerp(state.y, 0, dT);
-      state.z += 4.5*dt;
-      ostrich.root.rotation.x = THREE.MathUtils.lerp(0.35, 0.55, dT);
-      applyWingFlap(ostrich.wingL, t, 20, 0.5);
-      applyWingFlap(ostrich.wingR, t, 20, 0.5);
-    } else if(lt < 0.55){
-      // stumbling steps absorbing momentum
-      const sT = (lt-0.25)/0.3;
-      state.z += THREE.MathUtils.lerp(3.0,0.3,sT)*dt;
-      state.legCyclePhase += dt*10;
-      applyLegCycle(ostrich.legL, state.legCyclePhase, 0.4, 0.15, 0.2);
-      applyLegCycle(ostrich.legR, state.legCyclePhase+Math.PI, 0.4, 0.15, 0.2);
-      ostrich.root.rotation.x = THREE.MathUtils.lerp(0.55, 0.25, sT);
-      ostrich.root.position.y = groundHeight(0,state.z);
-      fireSFX(t, 10.1);
-    } else {
-      // falls into grass, lies down, lifts head embarrassed
-      const fT = smooth((lt-0.55)/0.45);
-      ostrich.root.rotation.x = THREE.MathUtils.lerp(0.25, 1.15, Math.min(1,fT*1.4));
-      ostrich.root.position.y = groundHeight(0,state.z) - fT*0.25;
-      applyIdleLeg(ostrich.legL,0.3); applyIdleLeg(ostrich.legR,0.3);
-      ostrich.wingL.pivot.rotation.z = THREE.MathUtils.lerp(0,0.3,fT);
-      ostrich.wingR.pivot.rotation.z = THREE.MathUtils.lerp(0,-0.3,fT);
-      // lifts head back up at the very end (embarrassed look to side)
-      const liftHead = smooth(Math.max(0,(fT-0.6))/0.4);
-      neckLook(ostrich.neckPivots, [
-        THREE.MathUtils.lerp(0.9,-0.1,liftHead),
-        THREE.MathUtils.lerp(0.9,-0.05,liftHead),
-        0.2
-      ]);
-      ostrich.head.rotation.y = liftHead*0.4;
-    }
-
-  // ================= SCENE 3: THE LEAF-WING INVENTION (13-19s) =================
-  } else if(t < T_NOTICE_END){
-    sceneName = 'Scene 3 — Notices the leaves';
-    const lt = smooth((t - T_LAND1_END)/(T_NOTICE_END - T_LAND1_END));
-    ostrich.root.rotation.x = THREE.MathUtils.lerp(1.15, 0, Math.min(1,lt*1.3));
-    ostrich.root.position.y = groundHeight(0,state.z);
-    ostrich.head.rotation.y = THREE.MathUtils.lerp(0.4, 0.9, lt); // turns to look at leaves
-    neckLook(ostrich.neckPivots, [0.1,0.1,0.1]);
-    applyIdleLeg(ostrich.legL); applyIdleLeg(ostrich.legR);
-
-  } else if(t < T_ATTACH_END){
-    sceneName = 'Scene 3 — Attaching leaf wings';
-    const lt = smooth((t - T_NOTICE_END)/(T_ATTACH_END - T_NOTICE_END));
-    ostrich.root.position.y = groundHeight(0,state.z);
-    ostrich.head.rotation.y = THREE.MathUtils.lerp(0.9,0,lt);
-    neckLook(ostrich.neckPivots, [0.2,0.2,0.1]);
-
-    // animate leaves rising from ground to the wingtips
-    const targetL = new THREE.Vector3().copy(ostrich.wingL.pivot.getWorldPosition(new THREE.Vector3()));
-    const targetR = new THREE.Vector3().copy(ostrich.wingR.pivot.getWorldPosition(new THREE.Vector3()));
-    leafL.group.position.lerpVectors(leafRestPos.L, new THREE.Vector3(targetL.x,targetL.y-0.3,targetL.z), lt);
-    leafR.group.position.lerpVectors(leafRestPos.R, new THREE.Vector3(targetR.x,targetR.y-0.3,targetR.z), lt);
-    leafL.group.rotation.z = THREE.MathUtils.lerp(0.3, 0, lt);
-    leafR.group.rotation.z = THREE.MathUtils.lerp(-0.3, 0, lt);
-    // natural droop under own weight while being carried
-    leafL.mesh.rotation.x = Math.sin(t*3)*0.05 - lt*0.1;
-    leafR.mesh.rotation.x = Math.sin(t*3+1)*0.05 - lt*0.1;
-
-    if(lt > 0.97 && !state.leavesAttached){
-      state.leavesAttached = true;
-      ostrich.wingL.pivot.attach(leafL.group);
-      ostrich.wingR.pivot.attach(leafR.group);
-      leafL.group.position.set(0.3,-0.65,0);
-      leafR.group.position.set(-0.3,-0.65,0);
-      leafL.group.rotation.set(0,0,0.15);
-      leafR.group.rotation.set(0,0,-0.15);
-    }
-
-  } else if(t < T_SPREAD_END){
-    sceneName = 'Scene 3 — Proud test flaps';
-    const lt = (t - T_ATTACH_END)/(T_SPREAD_END - T_ATTACH_END);
-    ostrich.root.position.y = groundHeight(0,state.z);
-    neckLook(ostrich.neckPivots, [-0.1,-0.1,-0.05]);
-    // two confident test flaps with leaf lag (spring)
-    const flapAngle = Math.sin(lt*Math.PI*2*1.4) * 0.6;
-    ostrich.wingL.pivot.rotation.z = flapAngle;
-    ostrich.wingR.pivot.rotation.z = -flapAngle;
-    [leafSpring.Lx, leafSpring.Lxv] = springTowards(leafSpring.Lx, flapAngle, leafSpring.Lxv, 40, 8, dt);
-    [leafSpring.Rx, leafSpring.Rxv] = springTowards(leafSpring.Rx, -flapAngle, leafSpring.Rxv, 40, 8, dt);
-    leafL.group.rotation.z = 0.15 + (leafSpring.Lx - flapAngle);
-    leafR.group.rotation.z = -0.15 + (leafSpring.Rx + flapAngle);
-    applyIdleLeg(ostrich.legL); applyIdleLeg(ostrich.legR);
-    fireSFX(t, 17.2); fireSFX(t, 17.6);
-
-  // ================= SCENE 4: SECOND FLIGHT ATTEMPT (19-26s) =================
-  } else if(t < T_RUN2_END){
-    sceneName = 'Scene 4 — Second sprint with leaf-wings';
-    const lt = (t - T_SPREAD_END)/(T_RUN2_END - T_SPREAD_END);
-    const speed = THREE.MathUtils.lerp(2.5, 10.0, lt);
-    state.z += speed*dt;
-    state.legCyclePhase += dt*speed*3.4;
-    applyLegCycle(ostrich.legL, state.legCyclePhase, 0.6, 0.3);
-    applyLegCycle(ostrich.legR, state.legCyclePhase+Math.PI, 0.6, 0.3);
-    ostrich.root.rotation.x = 0.14;
-    ostrich.root.position.y = groundHeight(0,state.z) + Math.abs(Math.sin(state.legCyclePhase*2))*0.04;
-    neckLook(ostrich.neckPivots, [-0.2,-0.15,-0.1]);
-
-    const flap = Math.sin(t*18)*0.7;
-    ostrich.wingL.pivot.rotation.z = flap;
-    ostrich.wingR.pivot.rotation.z = -flap;
-    [leafSpring.Lx, leafSpring.Lxv] = springTowards(leafSpring.Lx, flap, leafSpring.Lxv, 18, 5, dt);
-    [leafSpring.Rx, leafSpring.Rxv] = springTowards(leafSpring.Rx, -flap, leafSpring.Rxv, 18, 5, dt);
-    leafL.group.rotation.z = 0.15 + (leafSpring.Lx - flap)*1.4;
-    leafR.group.rotation.z = -0.15 + (leafSpring.Rx + flap)*1.4;
-    fireFootstepSFX(state.legCyclePhase);
-
-  } else if(t < T_JUMP2_END){
-    sceneName = 'Scene 4 — Second jump (slow-mo peak)';
-    const lt = (t - T_RUN2_END)/(T_JUMP2_END - T_RUN2_END);
-    const v0y = 3.8, v0z = 6.0; // stronger extension, still insufficient lift
-    const jumpT = lt*1.0;
-    state.y = Math.max(0, v0y*jumpT - 0.5*GRAVITY*jumpT*jumpT);
-    state.z += v0z*dt;
-    ostrich.root.position.y = groundHeight(0,state.z) + state.y;
-    ostrich.root.rotation.x = 0.18 + lt*0.1;
-    neckLook(ostrich.neckPivots, [-0.3,-0.2,-0.05]);
-    const flap = Math.sin(t*20)*0.8;
-    ostrich.wingL.pivot.rotation.z = flap; ostrich.wingR.pivot.rotation.z = -flap;
-    [leafSpring.Lx, leafSpring.Lxv] = springTowards(leafSpring.Lx, flap, leafSpring.Lxv, 14, 4, dt);
-    [leafSpring.Rx, leafSpring.Rxv] = springTowards(leafSpring.Rx, -flap, leafSpring.Rxv, 14, 4, dt);
-    leafL.group.rotation.z = 0.15 + (leafSpring.Lx - flap)*1.6;
-    leafR.group.rotation.z = -0.15 + (leafSpring.Rx + flap)*1.6;
-    fireSFX(t, 21.05); fireSFX(t, 21.1);
-
-  } else if(t < T_GUST_END){
-    sceneName = 'Scene 4 — Gust catches leaves, descent, detach, land';
-    const lt = (t - T_JUMP2_END)/(T_GUST_END - T_JUMP2_END);
-    if(lt < 0.35){
-      // gust folds leaves backward and twists them; body pitches forward, begins descent
-      const gT = lt/0.35;
-      state.y = Math.max(0, state.y - gT*0.5);
-      state.z += 4.0*dt;
-      ostrich.root.rotation.x = THREE.MathUtils.lerp(0.25, 0.5, gT);
-      leafL.group.rotation.x = THREE.MathUtils.lerp(0, 2.0, gT);
-      leafR.group.rotation.x = THREE.MathUtils.lerp(0, 2.3, gT);
-      leafL.group.rotation.z = THREE.MathUtils.lerp(0.15, 1.0, gT);
-      leafR.group.rotation.z = THREE.MathUtils.lerp(-0.15,-1.1, gT);
-      fireSFX(t, 23.4);
-    } else if(lt < 0.6){
-      // detach leaves -> independent rigid-body fall
-      if(!leafPhysics.L.active){
-        const wposL = leafL.group.getWorldPosition(new THREE.Vector3());
-        const wrotL = leafL.group.getWorldQuaternion(new THREE.Quaternion());
-        scene.attach(leafL.group);
-        leafL.group.position.copy(wposL);
-        leafL.group.quaternion.copy(wrotL);
-        leafPhysics.L.active = true;
-        leafPhysics.L.vel.set(-0.6, 1.2, state.vz*0.3);
-        leafPhysics.L.angVel.set(2.5, 1.0, 1.5);
-
-        const wposR = leafR.group.getWorldPosition(new THREE.Vector3());
-        const wrotR = leafR.group.getWorldQuaternion(new THREE.Quaternion());
-        scene.attach(leafR.group);
-        leafR.group.position.copy(wposR);
-        leafR.group.quaternion.copy(wrotR);
-        leafPhysics.R.active = true;
-        leafPhysics.R.vel.set(0.7, 1.0, state.vz*0.3);
-        leafPhysics.R.angVel.set(-2.0, 1.4, -1.2);
-      }
-      const dT = (lt-0.35)/0.25;
-      state.y = Math.max(0, state.y*(1-dT) );
-      state.z += THREE.MathUtils.lerp(3.0,1.0,dT)*dt;
-      ostrich.root.rotation.x = THREE.MathUtils.lerp(0.5, 0.65, dT);
-    } else {
-      // land, legs absorb impact
-      const lT = smooth((lt-0.6)/0.4);
-      state.z += THREE.MathUtils.lerp(1.0,0.1,lT)*dt;
-      state.legCyclePhase += dt*6;
-      applyLegCycle(ostrich.legL, state.legCyclePhase, 0.3,0.1, 0.4);
-      applyLegCycle(ostrich.legR, state.legCyclePhase+Math.PI, 0.3,0.1,0.4);
-      ostrich.root.rotation.x = THREE.MathUtils.lerp(0.65, 1.0, lT);
-      ostrich.root.position.y = groundHeight(0,state.z) - lT*0.15;
-      if(lT>0.5) fireSFX(t, 25.9);
-    }
-    ostrich.root.position.y = Math.max(ostrich.root.position.y, groundHeight(0,state.z) - 0.2);
-
-    // integrate detached leaves (gravity + drag + rotation) if active
-    integrateLeaf(leafPhysics.L, leafL.group, dt);
-    integrateLeaf(leafPhysics.R, leafR.group, dt);
-
-  // ================= SCENE 5: THE PUNCHLINE (26-30s) =================
-  } else if(t < T_PUNCH_END){
-    sceneName = 'Scene 5 — Lying in disbelief, leaf falls on head';
-    const lt = (t - T_GUST_END)/(T_PUNCH_END - T_GUST_END);
-    ostrich.root.position.y = groundHeight(0,state.z) - 0.15;
-    ostrich.root.rotation.x = 1.0;
-    neckLook(ostrich.neckPivots, [-0.2,-0.1,0.3]);
-    const blinkSlow = Math.sin(t*6) > 0.5 ? 0.1 : 1.0;
-    ostrich.eyeL.scale.y = blinkSlow; ostrich.eyeR.scale.y = blinkSlow;
-    integrateLeaf(leafPhysics.L, leafL.group, dt);
-    integrateLeaf(leafPhysics.R, leafR.group, dt);
-    // guide one leaf gently onto the head around lt ~0.5
-    if(lt>0.3 && lt<0.9){
-      const headPos = ostrich.head.getWorldPosition(new THREE.Vector3());
-      leafL.group.position.lerp(new THREE.Vector3(headPos.x, headPos.y+0.5,headPos.z), 0.03);
-    }
-
-  } else {
-    sceneName = 'Scene 5 — Stands up and walks away with dignity';
-    const lt = smooth((t - T_PUNCH_END)/(T_END - T_PUNCH_END));
-    ostrich.root.rotation.x = THREE.MathUtils.lerp(1.0, 0, Math.min(1,lt*1.6));
-    ostrich.root.position.y = groundHeight(0,state.z) + Math.sin(lt*Math.PI)*0.05;
-    neckLook(ostrich.neckPivots, [THREE.MathUtils.lerp(-0.2,0.1,lt),0,0]);
-    // shake feathers
-    ostrich.body.rotation.z = Math.sin(lt*40)*0.08*(1-lt);
-    // walk away
-    const walkSpeed = 1.3;
-    state.z += walkSpeed*dt*lt;
-    state.legCyclePhase += dt*walkSpeed*2.2;
-    applyLegCycle(ostrich.legL, state.legCyclePhase, 0.4,0.12);
-    applyLegCycle(ostrich.legR, state.legCyclePhase+Math.PI, 0.4,0.12);
-    applyIdleLeg(ostrich.legL,0); // overwritten next frame fine
-    ostrich.wingL.pivot.rotation.z *= 0.9;
-    ostrich.wingR.pivot.rotation.z *= 0.9;
-    integrateLeaf(leafPhysics.L, leafL.group, dt);
-    integrateLeaf(leafPhysics.R, leafR.group, dt);
-    fireSFX(t, 27.3); fireSFX(t, 29.6);
-
-    // caption fade in
-    captionEl.classList.toggle('show', lt > 0.25);
-  }
-
-  if(t < T_PUNCH_END) captionEl.classList.remove('show');
-
-  ostrich.root.position.x = state.x;
-  hudScene.textContent = sceneName;
-}
-
-function integrateLeaf(phys, obj, dt){
-  if(!phys.active) return;
-  phys.vel.y -= GRAVITY*0.5*dt; // lighter than body -> slower fall (air resistance)
-  phys.vel.multiplyScalar(0.98); // drag
-  obj.position.addScaledVector(phys.vel, dt);
-  obj.rotation.x += phys.angVel.x*dt;
-  obj.rotation.y += phys.angVel.y*dt;
-  obj.rotation.z += phys.angVel.z*dt;
-  phys.angVel.multiplyScalar(0.97);
-  const gy = groundHeight(obj.position.x, obj.position.z);
-  if(obj.position.y < gy+0.02){
-    obj.position.y = gy+0.02;
-    phys.vel.y = 0; phys.vel.x *= 0.5; phys.vel.z *= 0.5;
-    phys.angVel.multiplyScalar(0.6);
-  }
-}
-
-function fireFootstepSFX(phase){
-  const cyclePos = phase % Math.PI;
-  const key = Math.floor(phase/Math.PI);
-  if(cyclePos < 0.15 && !state.firedSFX.has('step'+key)){
-    state.firedSFX.add('step'+key);
-    playFootstep();
-  }
-}
-function fireSFX(t, atTime, tol=0.05){
-  const key = 'sfx'+atTime;
-  if(Math.abs(t-atTime) < tol && !state.firedSFX.has(key)){
-    state.firedSFX.add(key);
-    scheduledSFX.find(s=>s.t===atTime)?.fn();
-  }
-}
-
-/* ============================================================================================
-   UI HOOKUP (autoplay policies require a user gesture to start audio)
-   ============================================================================================ */
-const loadingEl = document.getElementById('loading');
-const tapHint = document.getElementById('tapHint');
-const captionEl = document.getElementById('caption');
-const hudScene = document.getElementById('hudScene');
-const hudTime = document.getElementById('hudTime');
-
-loadingEl.style.display = 'none';
-tapHint.classList.remove('hidden');
-tapHint.addEventListener('click', () => {
-  initAudio();
-  if(audioCtx.state === 'suspended') audioCtx.resume();
-  tapHint.classList.add('hidden');
-}, { once:true });
-
-/* ============================================================================================
-   RENDER LOOP
-   ============================================================================================ */
-const clock = new THREE.Clock();
-let elapsed = 0;
-
-function animate(){
-  requestAnimationFrame(animate);
-  const dt = Math.min(0.033, clock.getDelta());
-  elapsed += dt;
-  grassUniforms.uTime.value = elapsed;
-
-  const t = elapsed % DURATION;
-  updateTimeline(t, dt);
-
-  // camera
-  const cs = getCamState(t);
-  camera.position.copy(cs.pos);
-  camera.lookAt(cs.look.x, cs.look.y, cs.look.z);
-  camera.fov = cs.fov;
-  camera.updateProjectionMatrix();
-
-  // sun follows ostrich loosely to keep consistent shadow geography
-  sun.position.set(ostrich.root.position.x - 6, 9, ostrich.root.position.z - 4);
-  sun.target.position.set(ostrich.root.position.x, 0, ostrich.root.position.z);
-  sun.target.updateMatrixWorld();
-
-  const mm = String(Math.floor(t/60)).padStart(2,'0');
-  const ss = String(Math.floor(t%60)).padStart(2,'0');
-  hudTime.textContent = `00:${ss.padStart(2,'0')} / 00:30`;
-
-  renderer.render(scene, camera);
-}
-animate();
 </script>
 </body>
 </html>
